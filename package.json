@@ -69,7 +69,7 @@
 		"figlet": "^1.8.0",
 		"fuse.js": "^7.0.0",
 		"handlebars": "^4.7.8",
-		"inquirer": "8.2.6",
+		"inquirer": "12.2.0",
 		"inquirer-autocomplete-prompt": "2.0.1",
 		"inquirer-maxlength-input-prompt": "^1.0.2",
 		"ts-deepmerge": "^7.0.2",
@@ -118,7 +118,7 @@
 		"webpack-shell-plugin-next": "^2.3.2"
 	},
 	"overrides": {
-		"inquirer": "8.2.6"
+		"inquirer": "12.2.0"
 	},
 	"lint-staged": {
 		"*.{ts,tsx,js,jsx,yaml}": [
