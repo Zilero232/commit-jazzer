@@ -1,7 +1,7 @@
 {
 	"name": "commit-jazzer",
 	"type": "module",
-	"version": "1.1.3",
+	"version": "1.1.4",
 	"description": "🎸 Smart Git commit CLI that adds emojis and enforces Conventional Commits. Features intelligent commit message suggestions, customizable templates, and seamless integration with popular tools. Perfect for teams wanting consistent, readable git history.",
 	"author": {
 		"name": "Artemev Alexandr",

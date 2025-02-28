@@ -1,3 +1,5 @@
+## [1.1.4](https://github.com/Zilero232/commit-jazzer/compare/v1.1.3...v1.1.4) (2025-02-28)
+
 ## [1.1.3](https://github.com/Zilero232/commit-jazzer/compare/v1.1.2...v1.1.3) (2025-01-20)
 
 
