@@ -1,8 +1,10 @@
-import { LanguageEnum, type LanguageValues, type TranslationsJson } from '@/types/modules/language';
+import type {LanguageValues, TranslationsJson} from '@/types/modules/language';
+
+import { LanguageEnum   } from '@/types/modules/language';
 
 import en from './modules/en.json';
-import ru from './modules/ru.json';
 import es from './modules/es.json';
+import ru from './modules/ru.json';
 
 export const translations: Record<LanguageValues, Partial<TranslationsJson>> = {
 	[LanguageEnum.English]: en,

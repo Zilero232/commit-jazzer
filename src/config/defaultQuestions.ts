@@ -1,9 +1,11 @@
-import { translations } from '../translations';
-
+import type {TranslationsJson} from '@/types/modules/language';
 import type { BaseQuestion, PromptQuestionTypeValues } from '@/types/modules/prompt';
+
 import { CommitFieldsEnum } from '@/types/modules/commit';
-import { LanguageEnum, type TranslationsJson } from '@/types/modules/language';
+import { LanguageEnum  } from '@/types/modules/language';
 import { PromptQuestionTypeEnum } from '@/types/modules/prompt';
+
+import { translations } from '../translations';
 
 // Define current translations.
 const CURRENT_TRANSLATIONS: Partial<TranslationsJson> = translations[LanguageEnum.Russian];

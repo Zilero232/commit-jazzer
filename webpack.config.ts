@@ -1,15 +1,14 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import type { Configuration } from 'webpack';
 
+import CopyPlugin from 'copy-webpack-plugin';
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 import webpack from 'webpack';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import nodeExternals from 'webpack-node-externals';
-import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 import WebpackShellPluginNext from 'webpack-shell-plugin-next';
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
-import CopyPlugin from 'copy-webpack-plugin';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

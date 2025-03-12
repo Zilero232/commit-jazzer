@@ -1,7 +1,8 @@
-import figlet from 'figlet';
 import chalk from 'chalk';
+import figlet from 'figlet';
 
 import type { ShowBannerOptions } from '@/types/modules/banner';
+
 import DEFAULT_CONFIG_BANNER from '@/config/defaultConfigBanner';
 
 /**
@@ -25,7 +26,7 @@ const showBanner = async ({ bannerText = '', figletOptions, options = {} }: Show
 	}, 0);
 
 	return new Promise<void>((resolve, reject) => {
-		figlet.text(bannerText, figletOptions, function (error: Error | null, data?: string) {
+		figlet.text(bannerText, figletOptions, (error: Error | null, data?: string) => {
 			if (error) {
 				return reject(console.error(chalk.red('Something went wrong while generating the banner.'), error));
 			}

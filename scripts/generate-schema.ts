@@ -1,7 +1,8 @@
+import type { PartialArgs } from 'typescript-json-schema';
+
 import { existsSync, writeFileSync } from 'node:fs';
 import process from 'node:process';
 import { generateSchema, getProgramFromFiles } from 'typescript-json-schema';
-import type { PartialArgs } from 'typescript-json-schema';
 
 const TS_CONFIG_PATH = 'tsconfig.json';
 const TYPE_FILE_PATH = 'src/types/index.ts';
@@ -30,25 +31,25 @@ const checkFileExists = (path: string, description: string) => {
 		process.exit(1);
 	}
 
-	console.log(colors.info, `✓ ${description} found`);
+	console.warn(colors.info, `✓ ${description} found`);
 };
 
 try {
-	console.log(colors.info, '🚀 Starting JSON schema generation...');
+	console.warn(colors.info, '🚀 Starting JSON schema generation...');
 
 	checkFileExists(TS_CONFIG_PATH, 'TypeScript config');
 	checkFileExists(TYPE_FILE_PATH, 'Type definitions file');
 
 	const program = getProgramFromFiles([TYPE_FILE_PATH], {}, TS_CONFIG_PATH);
 
-	console.log(colors.info, '📝 Program AST successfully created');
+	console.warn(colors.info, '📝 Program AST successfully created');
 
 	const schema = generateSchema(program, TYPE_NAME, settings);
 
 	if (schema) {
 		writeFileSync(OUTPUT_PATH, JSON.stringify(schema, null, 2), 'utf-8');
 
-		console.log(colors.success, `✨ JSON schema successfully generated at: ${OUTPUT_PATH}`);
+		console.warn(colors.success, `✨ JSON schema successfully generated at: ${OUTPUT_PATH}`);
 	} else {
 		console.error(colors.error, '❌ Schema generation failed: Schema object is null');
 

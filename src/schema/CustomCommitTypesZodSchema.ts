@@ -1,5 +1,6 @@
-import { z } from 'zod';
 import type { ZodType } from 'zod';
+
+import { z } from 'zod';
 
 import type { CommitJazzerPrompterOptions } from '../types';
 

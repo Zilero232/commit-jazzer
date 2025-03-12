@@ -1,4 +1,5 @@
 import type { Answers } from 'inquirer';
+
 import Base from 'inquirer/lib/prompts/base.js';
 
 /**

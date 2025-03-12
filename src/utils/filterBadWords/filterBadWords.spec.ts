@@ -1,7 +1,7 @@
 import type { Mock } from 'vitest';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import BadWordFilterPlugin from '@/lib/BadWordFilter';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import BadWordFilter from 'pure-flow-ai';
 
 import LOG_MESSAGES from '@/constants/logMessages';
 
@@ -20,7 +20,7 @@ describe('filterBadWords', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		(BadWordFilterPlugin as Mock).mockReturnValue({
+		(BadWordFilter as Mock).mockReturnValue({
 			hasProfaneWords: mockHasProfaneWords,
 			maskProfanity: mockMaskProfanity,
 			cleanString: mockCleanString,

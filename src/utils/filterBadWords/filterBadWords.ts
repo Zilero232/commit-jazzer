@@ -1,12 +1,12 @@
-import BadWordFilterPlugin from '@/lib/BadWordFilter';
-
-import LOG_MESSAGES from '@/constants/logMessages';
+import BadWordFilter from 'pure-flow-ai';
 
 import type { BadWordsOptions } from '@/types/modules/badWords';
 
+import LOG_MESSAGES from '@/constants/logMessages';
+
 interface FilterBadWordsProps {
-	message: string;
 	configuration: BadWordsOptions;
+	message: string;
 }
 
 /**
@@ -22,10 +22,10 @@ interface FilterBadWordsProps {
  *
  * @returns {string | boolean} - The processed message or false if a prohibited word is found.
  */
-export const filterBadWords = ({ message = '', configuration = {} }: FilterBadWordsProps): string | boolean => {
+export const filterBadWords = ({ message = '', configuration = {} }: FilterBadWordsProps): boolean | string => {
 	const { clearMessage, checkHasProfaneWords, replaceProfaneWords, options = {} } = configuration;
 
-	const { hasProfaneWords, maskProfanity, cleanString } = BadWordFilterPlugin(options);
+	const { hasProfaneWords, maskProfanity, cleanString } = BadWordFilter(options);
 
 	// Checking for prohibited words.
 	if (checkHasProfaneWords) {

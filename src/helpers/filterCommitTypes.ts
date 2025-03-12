@@ -3,9 +3,9 @@ import DEFAULT_COMMIT_TYPES from '@/constants/emojiCommit';
 import type { CommitJazzerPrompterOptions } from '../types';
 
 interface FilterCommitTypes {
+	addCustomCommitTypes?: CommitJazzerPrompterOptions['addCustomCommitTypes'];
 	availableCommitTypes?: CommitJazzerPrompterOptions['availableCommitTypes'];
 	baseCommitTypes?: CommitJazzerPrompterOptions['baseCommitTypes'];
-	addCustomCommitTypes?: CommitJazzerPrompterOptions['addCustomCommitTypes'];
 }
 
 /**

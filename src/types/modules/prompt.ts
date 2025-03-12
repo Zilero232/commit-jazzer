@@ -79,22 +79,22 @@ export interface BaseQuestion extends BaseInterfaceQuestion {
 // Define prompt questions.
 export interface PromptQuestions extends BaseInterfaceQuestion {
 	/**
-	 * Question type.
-	 *
-	 * @default "input"
-	 */
-	type: PromptQuestionTypeValues | string;
-
-	/**
 	 * Question key.
 	 *
 	 * @default "random"
 	 */
-	key: CommitFieldsValues | string;
+	key: string | CommitFieldsValues;
+
+	/**
+	 * Question type.
+	 *
+	 * @default "input"
+	 */
+	type: string | PromptQuestionTypeValues;
 }
 
 // Исключаем ActionType из CommitFieldsEnum
-type CommitFieldsWithoutActionType = CommitFieldsValues | 'emoji';
+type CommitFieldsWithoutActionType = 'emoji' | CommitFieldsValues;
 
 // Define prompt answers type.
 export type PromptAnswers = {

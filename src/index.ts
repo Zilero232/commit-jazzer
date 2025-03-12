@@ -1,15 +1,14 @@
 import inquirerPrompt from 'inquirer-autocomplete-prompt';
 import InquirerMaxLength from 'inquirer-maxlength-input-prompt';
 
-import { filterBadWords, generateQuestionPrompts, loadJazzerConfig, messageFormatter } from './utils';
+import type { CommitMessageFunc, TypeInquirer } from './types';
+import type {PromptAnswers} from './types/modules/prompt';
 
 import flattenAnswers from './helpers/flattenAnswers';
 import { isBoolean } from './helpers/typeGuards';
-
-import type { CommitMessageFunc, TypeInquirer } from './types';
-import { type PromptAnswers, PromptQuestionTypeEnum } from './types/modules/prompt';
-
 import showBanner from './scripts/showCommitBanner';
+import {  PromptQuestionTypeEnum } from './types/modules/prompt';
+import { filterBadWords, generateQuestionPrompts, loadJazzerConfig, messageFormatter } from './utils';
 
 /**
  * Commitizen adapter for formatting commit messages with style and rhythm.

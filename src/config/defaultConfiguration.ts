@@ -1,7 +1,8 @@
 import type { CommitJazzerPrompterOptions } from '@/types/index.ts';
 
-import { LanguageEnum } from '@/types/modules/language';
 import { CommitFieldsEnum } from '@/types/modules/commit';
+import { LanguageEnum } from '@/types/modules/language';
+
 import DEFAULT_CONFIG_BANNER from './defaultConfigBanner';
 
 // Define base template format.

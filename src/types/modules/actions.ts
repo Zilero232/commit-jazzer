@@ -47,13 +47,6 @@ export enum CommitActionsEnum {
 // Define base commit type.
 export interface BaseCommitType {
 	/**
-	 * Emoji of the type commit.
-	 *
-	 * @default "🚀"
-	 */
-	emoji: string;
-
-	/**
 	 * Code of the emoji.
 	 *
 	 * @default ":rocket:"
@@ -66,6 +59,13 @@ export interface BaseCommitType {
 	 * @default "Deploying application"
 	 */
 	description: string;
+
+	/**
+	 * Emoji of the type commit.
+	 *
+	 * @default "🚀"
+	 */
+	emoji: string;
 }
 
 // Define commit type names.

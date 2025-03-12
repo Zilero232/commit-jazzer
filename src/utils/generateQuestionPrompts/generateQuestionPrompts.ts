@@ -1,21 +1,16 @@
-import { translations } from '@/translations';
-
-import { createAutocompleteSource } from '@/utils';
-
-import AnswerZodSchema from '@/schema/AnswerZodSchema';
-
-import generateErrorReport from '@/helpers/generateErrorReport';
-import filterCommitTypes from '@/helpers/filterCommitTypes';
-import { isObject } from '@/helpers/typeGuards';
-
 import type { CommitJazzerPrompterOptions } from '@/types/index';
 import type { BaseQuestion, PromptQuestions, PromptQuestionTypeValues } from '@/types/modules/prompt';
-import { PromptQuestionTypeEnum } from '@/types/modules/prompt';
-import { CommitFieldsEnum } from '@/types/modules/commit';
 
 import DEFAULT_QUESTIONS from '@/config/defaultQuestions';
-
 import LOG_MESSAGES from '@/constants/logMessages';
+import filterCommitTypes from '@/helpers/filterCommitTypes';
+import generateErrorReport from '@/helpers/generateErrorReport';
+import { isObject } from '@/helpers/typeGuards';
+import AnswerZodSchema from '@/schema/AnswerZodSchema';
+import { translations } from '@/translations';
+import { CommitFieldsEnum } from '@/types/modules/commit';
+import { PromptQuestionTypeEnum } from '@/types/modules/prompt';
+import { createAutocompleteSource } from '@/utils';
 
 /**
  * Generate questions for the commit prompter based on the given options.

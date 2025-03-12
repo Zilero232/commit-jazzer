@@ -1,11 +1,11 @@
 import type { ZodIssue } from 'zod';
 
 interface GenerateErrorOptions {
+	includeIssueCode?: boolean; // Include the error code in the message.
+	maxIssues?: number; // The maximum number of errors displayed.
 	prefix?: string; // Prefix for each message.
 	separator?: string; // Separator between messages.
 	showFieldPath?: boolean; // Show the path to the field where the error occurred.
-	includeIssueCode?: boolean; // Include the error code in the message.
-	maxIssues?: number; // The maximum number of errors displayed.
 }
 
 interface GenerateErrorReport {

@@ -1,5 +1,6 @@
-import { format, transports } from 'winston';
 import type { LoggerOptions } from 'winston';
+
+import { format, transports } from 'winston';
 
 import { LogLevel } from '@/types/modules/winston';
 

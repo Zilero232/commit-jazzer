@@ -1,15 +1,16 @@
 import type { IFuseOptions } from 'fuse.js';
+
 import Fuse from 'fuse.js';
 
 import createFormattedOptions from '@/helpers/createFormattedOptions';
 
 interface CreateAutocompleteSourceProps<T> {
 	data: T[];
+	fuseOptions?: IFuseOptions<T>;
 	formatOptions?: {
 		templateShowFormat?: string;
 		templateValueFormat?: Record<string, keyof T>;
 	};
-	fuseOptions?: IFuseOptions<T>;
 }
 
 /**

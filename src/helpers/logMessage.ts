@@ -1,8 +1,9 @@
 import { createLogger } from 'winston';
 
-import { LogLevel, type LogLevelValues } from '@/types/modules/winston';
+import type {LogLevelValues} from '@/types/modules/winston';
 
 import loggerWinstonConfig from '@/config/loggerWinstonConfig';
+import { LogLevel  } from '@/types/modules/winston';
 
 interface LogMessageProps {
 	level?: LogLevelValues;

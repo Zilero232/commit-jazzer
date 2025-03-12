@@ -1,12 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { translations } from '@/translations';
-
 import type { CommitFieldsValues } from '@/types/modules/commit';
+
+import { translations } from '@/translations';
+import { CommitActionsEnum } from '@/types/modules/actions';
 import { CommitFieldsEnum } from '@/types/modules/commit';
 import { LanguageEnum } from '@/types/modules/language';
-import { CommitActionsEnum } from '@/types/modules/actions';
-
 import { generateQuestionPrompts } from '@/utils';
 
 vi.mock('@/helpers/generateErrorReport', () => ({

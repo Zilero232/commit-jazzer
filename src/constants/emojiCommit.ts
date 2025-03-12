@@ -1,4 +1,5 @@
 import type { BaseCommitType, CommitActionNames } from '@/types/modules/actions';
+
 import { CommitActionsEnum } from '@/types/modules/actions';
 
 interface CommitType extends BaseCommitType {
@@ -7,7 +8,7 @@ interface CommitType extends BaseCommitType {
 	 *
 	 * @default "deploy"
 	 */
-	name: CommitActionNames | string;
+	name: string | CommitActionNames;
 }
 
 const DEFAULT_COMMIT_TYPES: CommitType[] = [

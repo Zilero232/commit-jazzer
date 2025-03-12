@@ -1,11 +1,11 @@
 import type Inquirer from 'inquirer';
 
-import type { CommitFieldsValues } from './modules/commit';
 import type { BaseCommitType, CommitActionNames, CommitActionsEnum } from './modules/actions';
-import type { BaseQuestion } from './modules/prompt';
-import type { LanguageValues } from './modules/language';
 import type { BadWordsOptions } from './modules/badWords';
 import type { ShowBannerOptions } from './modules/banner';
+import type { CommitFieldsValues } from './modules/commit';
+import type { LanguageValues } from './modules/language';
+import type { BaseQuestion } from './modules/prompt';
 
 // Define Inquirer types.
 export type TypeInquirer = typeof Inquirer;
@@ -16,25 +16,18 @@ export type CommitMessageFunc = (commitMessage: string) => void;
 // Define commit jazzer prompter commitizen options.
 export interface CommitJazzerPrompterOptions {
 	/**
-	 * Language.
+	 * Create custom commit types.
 	 *
-	 * @default "en"
+	 * @default {}
 	 */
-	language?: LanguageValues;
-
-	/**
-	 * Format message.
-	 *
-	 * @default "{{type}}: {{emoji}} - {{title}}";
-	 */
-	template?: string;
+	addCustomCommitTypes?: Record<string, BaseCommitType>;
 
 	/**
 	 * The types that will be shown in the list of type selections.
 	 *
 	 * @default []
 	 */
-	availableCommitTypes?: (CommitActionNames | string)[];
+	availableCommitTypes?: (string | CommitActionNames)[];
 
 	/**
 	 * The types that will be shown in the list of type selections.
@@ -44,18 +37,18 @@ export interface CommitJazzerPrompterOptions {
 	availablePromptQuestions?: CommitFieldsValues[];
 
 	/**
+	 * Bad words validation options.
+	 *
+	 * @default {}
+	 */
+	badWordsOptions?: BadWordsOptions;
+
+	/**
 	 * Can change the basic types here.
 	 *
 	 * @default {}
 	 */
 	baseCommitTypes?: Partial<Record<CommitActionsEnum, Partial<BaseCommitType>>>;
-
-	/**
-	 * Create custom commit types.
-	 *
-	 * @default {}
-	 */
-	addCustomCommitTypes?: Record<string, BaseCommitType>;
 
 	/**
 	 * Change options of the basic questions.
@@ -65,18 +58,11 @@ export interface CommitJazzerPrompterOptions {
 	baseQuestionsOptions?: BaseQuestion[];
 
 	/**
-	 * Check commit message for bad words
+	 * Language.
 	 *
-	 * @default true
+	 * @default "en"
 	 */
-	validateCommitBadWords?: boolean;
-
-	/**
-	 * Bad words validation options.
-	 *
-	 * @default {}
-	 */
-	badWordsOptions?: BadWordsOptions;
+	language?: LanguageValues;
 
 	/**
 	 * Show the banner before starting the commit process.
@@ -91,4 +77,18 @@ export interface CommitJazzerPrompterOptions {
 	 * @default {}
 	 */
 	showBannerOptions?: ShowBannerOptions;
+
+	/**
+	 * Format message.
+	 *
+	 * @default "{{type}}: {{emoji}} - {{title}}";
+	 */
+	template?: string;
+
+	/**
+	 * Check commit message for bad words
+	 *
+	 * @default true
+	 */
+	validateCommitBadWords?: boolean;
 }

@@ -1,19 +1,16 @@
-import process from 'node:process';
 import { cosmiconfig } from 'cosmiconfig';
 import { TypeScriptLoader } from 'cosmiconfig-typescript-loader';
+import process from 'node:process';
 import { merge } from 'ts-deepmerge';
 
-import CommitJazzerPrompterOptionsZodSchema from '@/schema/JazzerZodSchema';
-
-import generateErrorReport from '@/helpers/generateErrorReport';
-import { isObject } from '@/helpers/typeGuards';
-
-import { CONFIG_FILE_NAMES, COSMICONFIG_MODULE_NAME } from '@/constants/configPlugin';
-import LOG_MESSAGES from '@/constants/logMessages';
+import type { CommitJazzerPrompterOptions } from '@/types/index';
 
 import DEFAULT_CONFIGURATION from '@/config/defaultConfiguration';
-
-import type { CommitJazzerPrompterOptions } from '@/types/index';
+import { CONFIG_FILE_NAMES, COSMICONFIG_MODULE_NAME } from '@/constants/configPlugin';
+import LOG_MESSAGES from '@/constants/logMessages';
+import generateErrorReport from '@/helpers/generateErrorReport';
+import { isObject } from '@/helpers/typeGuards';
+import CommitJazzerPrompterOptionsZodSchema from '@/schema/JazzerZodSchema';
 
 /**
  * Loads the configuration for the CommitJazzerPrompter.

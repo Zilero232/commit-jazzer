@@ -1,6 +1,5 @@
-import { messageFormatter } from '@/utils';
-
 import LOG_MESSAGES from '@/constants/logMessages';
+import { messageFormatter } from '@/utils';
 
 interface CreateFormattedOptionsProps<T> {
 	data: T[];

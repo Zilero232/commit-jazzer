@@ -1,22 +1,23 @@
-import { z } from 'zod';
 import type { ZodType } from 'zod';
+
+import { z } from 'zod';
+
+import type { CommitJazzerPrompterOptions } from '@/types/index';
 
 import type { ZodBaseQuestionsOptions } from './QuestionZodSchema';
 import type { ZodShowBannerOptions } from './ShowBannerZodSchema';
 
-import type { CommitJazzerPrompterOptions } from '@/types/index';
-import { ZCommitActionType, ZLanguage } from './modules/ZodEnums';
-
-import { BaseQuestionsOptionsSchema } from './QuestionZodSchema';
+import BadWordsOptionsSchema from './BadWordsOptionsSchema';
 import CommitTypesSchema from './CommitTypesZodSchema';
 import AddCustomCommitTypesSchema from './CustomCommitTypesZodSchema';
-import BadWordsOptionsSchema from './BadWordsOptionsSchema';
+import { ZCommitActionType, ZLanguage } from './modules/ZodEnums';
+import { BaseQuestionsOptionsSchema } from './QuestionZodSchema';
 import ShowBannerOptionsSchema from './ShowBannerZodSchema';
 
 // Remove fields for override.
 type OmitCommitJazzerPrompterOptions = Omit<
 	CommitJazzerPrompterOptions,
-	'language' | 'availableCommitTypes' | 'availablePromptQuestions' | 'baseQuestionsOptions' | 'createCustomQuestions' | 'showBannerOptions'
+	'availableCommitTypes' | 'availablePromptQuestions' | 'baseQuestionsOptions' | 'createCustomQuestions' | 'language' | 'showBannerOptions'
 >;
 
 // Define options with updated availableCommitTypes type.

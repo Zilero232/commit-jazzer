@@ -1,6 +1,5 @@
-import { LogLevel } from '@/types/modules/winston';
-
 import logMessage from '@/helpers/logMessage';
+import { LogLevel } from '@/types/modules/winston';
 
 import { PLUGIN_NAME } from './configPlugin';
 

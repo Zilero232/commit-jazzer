@@ -1,5 +1,6 @@
-import { z } from 'zod';
 import type { ZodType } from 'zod';
+
+import { z } from 'zod';
 
 import type { BadWordsOptions } from '@/types/modules/badWords';
 
@@ -11,7 +12,6 @@ const BadWordsOptionsSchema: ZodType<BadWordsOptions> = z.object({
 		.object({
 			additionalBlockWords: z.array(z.string()).optional(),
 			excludedWords: z.array(z.string()).optional(),
-			placeholder: z.string().optional(),
 			overrideBlockWords: z.boolean().optional(),
 		})
 		.optional(),

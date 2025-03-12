@@ -1,7 +1,7 @@
 import type { Mock } from 'vitest';
-import { describe, expect, it, vi } from 'vitest';
 
 import Fuse from 'fuse.js';
+import { describe, expect, it, vi } from 'vitest';
 
 import createFormattedOptions from '@/helpers/createFormattedOptions';
 

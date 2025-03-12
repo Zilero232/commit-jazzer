@@ -1,15 +1,12 @@
 import type { Mock } from 'vitest';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { cosmiconfig } from 'cosmiconfig';
-
-import CommitJazzerPrompterOptionsZodSchema from '@/schema/JazzerZodSchema';
-
-import generateErrorReport from '@/helpers/generateErrorReport';
-
-import LOG_MESSAGES from '@/constants/logMessages';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import DEFAULT_CONFIGURATION from '@/config/defaultConfiguration';
+import LOG_MESSAGES from '@/constants/logMessages';
+import generateErrorReport from '@/helpers/generateErrorReport';
+import CommitJazzerPrompterOptionsZodSchema from '@/schema/JazzerZodSchema';
 
 import { loadJazzerConfig } from './loadJazzerConfig';
 

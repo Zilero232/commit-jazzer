@@ -1,4 +1,4 @@
-import type { BadWordFilterOptions } from '../../../lib/BadWordFilter/types';
+import { BadWordFilterOptions } from 'pure-flow-ai';
 
 // Define bad words options.
 export interface BadWordsOptions {
@@ -23,7 +23,7 @@ export interface BadWordsOptions {
 	 */
 	replaceProfaneWords?: boolean;
 
-	/**
+  /**
 	 * Bad words validation options.
 	 *
 	 * @default {}

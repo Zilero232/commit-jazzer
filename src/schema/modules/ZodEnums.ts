@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-import { LanguageEnum } from '@/types/modules/language';
 import { CommitActionsEnum } from '@/types/modules/actions';
 import { CommitFieldsEnum } from '@/types/modules/commit';
+import { LanguageEnum } from '@/types/modules/language';
 
 // Get the enumeration values and convert them to an array of strings.
 export const ZLanguage = z.enum(Object.values(LanguageEnum) as unknown as readonly [string, ...string[]]);

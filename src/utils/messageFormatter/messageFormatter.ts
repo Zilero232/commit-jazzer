@@ -9,9 +9,9 @@ interface MessageFormatterOptions {
 }
 
 interface FormatMessageProps<T> {
-	template: string;
 	data: T;
 	options?: MessageFormatterOptions;
+	template: string;
 }
 
 /**

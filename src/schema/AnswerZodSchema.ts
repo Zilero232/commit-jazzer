@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import type { PromptQuestionOptions, PromptQuestionTypeValues } from '@/types/modules/prompt';
+
 import { PromptQuestionTypeEnum } from '@/types/modules/prompt';
 
 /**
@@ -12,7 +13,7 @@ import { PromptQuestionTypeEnum } from '@/types/modules/prompt';
  * @returns Zod schema for the given prompt question.
  */
 const AnswerZodSchema = (type: PromptQuestionTypeValues, options: PromptQuestionOptions) => {
-	let schema: z.ZodString | z.ZodObject<any> = z.string();
+	let schema: z.ZodObject<any> | z.ZodString = z.string();
 
 	const lengthOptions = options.validations?.length;
 
