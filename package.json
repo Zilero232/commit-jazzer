@@ -123,7 +123,7 @@
 		"fork-ts-checker-webpack-plugin": "^9.0.2",
 		"husky": "^9.1.6",
 		"knip": "^5.36.3",
-		"lint-staged": "^15.2.10",
+		"lint-staged": "^16.0.0",
 		"ts-loader": "^9.5.1",
 		"ts-node": "^10.9.2",
 		"tsconfig-paths-webpack-plugin": "^4.1.0",
