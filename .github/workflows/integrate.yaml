@@ -22,7 +22,7 @@ jobs:
     steps:
       # Step to check out the repository code.
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Step to cache the `node_modules` directory to improve performance of subsequent runs.
       - name: Cache Node modules
