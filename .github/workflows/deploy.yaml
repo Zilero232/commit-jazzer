@@ -38,7 +38,7 @@ jobs:
       # Step to cache the `node_modules` directory to improve performance of subsequent runs.
       - name: Cache Node modules
         id: yarn-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: node_modules
           key: ${{ runner.os }}-yarn-${{ steps.setup-node.outputs.node-version }}-${{ hashFiles('**/yarn.lock') }}
