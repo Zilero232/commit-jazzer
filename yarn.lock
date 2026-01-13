@@ -2352,7 +2352,7 @@ acorn-jsx@^5.3.2:
   resolved "https://registry.npmjs.org/acorn-jsx/-/acorn-jsx-5.3.2.tgz#7ed5bb55908b3b2f1bc55c6af1653bada7f07937"
   integrity sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==
 
-acorn-walk@^8.0.0, acorn-walk@^8.1.1:
+acorn-walk@^8.0.0, acorn-walk@^8.1.1, acorn-walk@^8.3.4:
   version "8.3.4"
   resolved "https://registry.npmjs.org/acorn-walk/-/acorn-walk-8.3.4.tgz#794dd169c3977edf4ba4ea47583587c5866236b7"
   integrity sha512-ueEepnujpqee2o5aIYnvHU6C0A42MNdsIDeqy5BydrkuC5R1ZuUFnm27EeFJGoEHJQgn3uleRvmTXaJgfXbt4g==
@@ -2363,6 +2363,11 @@ acorn@^8.0.4, acorn@^8.11.0, acorn@^8.14.0, acorn@^8.4.1, acorn@^8.5.0, acorn@^8
   version "8.14.0"
   resolved "https://registry.npmjs.org/acorn/-/acorn-8.14.0.tgz#063e2c70cac5fb4f6467f0b11152e04c682795b0"
   integrity sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==
+
+acorn@^8.14.1:
+  version "8.15.0"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.15.0.tgz#a360898bc415edaac46c8241f6383975b930b816"
+  integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
 
 aggregate-error@^3.0.0:
   version "3.1.0"
@@ -6755,10 +6760,10 @@ type-fest@^0.8.1:
   resolved "https://registry.npmjs.org/type-fest/-/type-fest-0.8.1.tgz#09e249ebde851d3b1e48d27c105444667f17b83d"
   integrity sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
 
-typescript-json-schema@^0.66.0:
-  version "0.66.0"
-  resolved "https://registry.yarnpkg.com/typescript-json-schema/-/typescript-json-schema-0.66.0.tgz#ca427112b395db41f36aa67d762cd1e92696df29"
-  integrity sha512-+D7Lsr9Y7tfp+Uuc1qggl709OHdqswo58PV62OZGWcT+zT0R2wG9GnygJIlUAjpL5yjmYaxP7ofJ/9ZZLD5LpQ==
+typescript-json-schema@^0.67.0:
+  version "0.67.1"
+  resolved "https://registry.yarnpkg.com/typescript-json-schema/-/typescript-json-schema-0.67.1.tgz#e894a540a38bf6b07d1e3ec66764d43ac85df34b"
+  integrity sha512-vKTZB/RoYTIBdVP7E7vrgHMCssBuhja91wQy498QIVhvfRimaOgjc98uwAXmZ7mbLUytJmOSbF11wPz+ByQeXg==
   dependencies:
     "@types/json-schema" "^7.0.9"
     "@types/node" "^18.11.9"
@@ -6767,6 +6772,7 @@ typescript-json-schema@^0.66.0:
     safe-stable-stringify "^2.2.0"
     ts-node "^10.9.1"
     typescript "~5.5.0"
+    vm2 "^3.10.0"
     yargs "^17.1.1"
 
 typescript@^5.6.3:
@@ -6947,6 +6953,14 @@ vitest@^2.1.4:
     vite "^5.0.0 || ^6.0.0"
     vite-node "2.1.6"
     why-is-node-running "^2.3.0"
+
+vm2@^3.10.0:
+  version "3.10.1"
+  resolved "https://registry.yarnpkg.com/vm2/-/vm2-3.10.1.tgz#f06e263a21f4802bf6dc2bbacf8d3b702d999d67"
+  integrity sha512-5VKPEiEzLPiIKxfHoGoafr1yL5PKeALbbwwYhiwyEgWmslnao7e1UxKGL93ekGGt45ETs+zFB0tTYLADzCWH8g==
+  dependencies:
+    acorn "^8.14.1"
+    acorn-walk "^8.3.4"
 
 vscode-languageserver-textdocument@^1.0.12:
   version "1.0.12"
