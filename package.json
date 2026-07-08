@@ -107,7 +107,7 @@
 		"@types/figlet": "^1.7.0",
 		"@types/inquirer": "^9.0.7",
 		"@types/inquirer-autocomplete-prompt": "^3.0.3",
-		"@types/node": "^22.9.0",
+		"@types/node": "^24.0.0",
 		"@types/webpack-bundle-analyzer": "^4.7.0",
 		"@types/webpack-node-externals": "^3.0.4",
 		"@vitest/coverage-v8": "^2.1.5",
