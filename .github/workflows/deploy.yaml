@@ -33,7 +33,7 @@ jobs:
         id: setup-node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       # Step to cache the `node_modules` directory to improve performance of subsequent runs.
       - name: Cache Node modules
