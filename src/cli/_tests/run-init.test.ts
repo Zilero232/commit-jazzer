@@ -4,7 +4,7 @@ import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { InitOptions } from '../args';
+import type { InitOptions } from '../cli.types';
 
 import { captureOutput, createTempDir, useTempRepo } from '../../shared/testing/helpers';
 import { HOOK_MARKER, TS_CONFIG } from '../commands/init/init.constants';

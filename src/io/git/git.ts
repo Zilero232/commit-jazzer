@@ -1,5 +1,6 @@
 import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
+import { isDefined } from 'remeda';
 
 import type { GitCommitInput, GitConfigInput, GitInput, GitPathInput, RunGitInput } from './git.types';
 
@@ -21,11 +22,11 @@ export const isInsideWorkTree = async (input?: GitInput): Promise<boolean> =>
 
 /** `git diff --cached --quiet` exits with 1 when something is staged. */
 export const hasStagedChanges = async (input?: GitInput): Promise<boolean> =>
-  (await git({ args: ['diff', '--cached', '--quiet'], ...input })) === undefined;
+  !isDefined(await git({ args: ['diff', '--cached', '--quiet'], ...input }));
 
 /** Whether git knows the path: it commits a deleted file too, which no longer exists on disk. */
 export const isTracked = async ({ path, cwd }: GitPathInput): Promise<boolean> =>
-  (await git({ args: ['ls-files', '--error-unmatch', '--', path], cwd })) !== undefined;
+  isDefined(await git({ args: ['ls-files', '--error-unmatch', '--', path], cwd }));
 
 /** A value of the git config, e.g. `core.commentChar`; `undefined` when it is not set. */
 export const getConfigValue = ({ key, cwd }: GitConfigInput): Promise<string | undefined> =>

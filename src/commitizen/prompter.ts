@@ -1,3 +1,5 @@
+import { isDefined } from 'remeda';
+
 import { exitCodeOf, reportError, reportResult, runJazzer } from '../app';
 
 export type CommitizenCommit = (message: string) => void;
@@ -13,7 +15,7 @@ export const prompter = async (_inquirer: unknown, commit: CommitizenCommit): Pr
     const result = await runJazzer();
     const message = reportResult(result);
 
-    if (message === undefined) {
+    if (!isDefined(message)) {
       process.exitCode = exitCodeOf(result);
 
       return;

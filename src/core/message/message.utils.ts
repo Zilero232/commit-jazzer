@@ -1,3 +1,4 @@
+import { isDefined } from 'remeda';
 import stringWidth from 'string-width';
 import wrapAnsi from 'wrap-ansi';
 
@@ -45,10 +46,10 @@ export const wrapLine = ({ line, width }: WrapLineInput): string[] => {
       const cut = previous?.lastIndexOf(' ') ?? -1;
 
       // A line must not start with "#": the last word of the line above moves down with it.
-      if (previous !== undefined && part.startsWith('#') && cut > indent.length) {
+      if (isDefined(previous) && part.startsWith('#') && cut > indent.length) {
         lines[lines.length - 1] = previous.slice(0, cut);
         lines.push(`${indent}${previous.slice(cut + 1)} ${part}`);
-      } else if (previous !== undefined && part.startsWith('#')) {
+      } else if (isDefined(previous) && part.startsWith('#')) {
         lines[lines.length - 1] = `${previous} ${part}`;
       } else {
         lines.push(`${indent}${part}`);

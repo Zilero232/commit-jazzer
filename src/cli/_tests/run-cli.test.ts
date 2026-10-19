@@ -32,13 +32,14 @@ describe('runCli', () => {
     expect(await run('--help')).toBe(0);
 
     [
-      'jazzer init',
-      'jazzer hook <file>',
-      'jazzer lint',
-      'jazzer :<alias>',
+      'init [options]',
+      'hook [options] <file> [source]',
+      'lint [options] [file]',
+      '[alias]',
       '--dry-run',
       '--retry',
-      '--no-verify'
+      '--no-verify',
+      'jazzer :deps'
     ].forEach((text) => expect(output.stdout()).toContain(text));
   });
 
@@ -58,9 +59,27 @@ describe('runCli', () => {
 
   it('fails on bad arguments with a hint, without running anything', async () => {
     expect(await run('innit')).toBe(1);
-    expect(output.stderr()).toContain('[commit-jazzer] Unknown command "innit"');
+    expect(output.stderr()).toContain("error: unknown command 'innit'");
     expect(output.stderr()).toContain('jazzer --help');
     expect(runCommit).not.toHaveBeenCalled();
+  });
+
+  it("rejects an unknown option in commander's format", async () => {
+    expect(await run('--nope')).toBe(1);
+    expect(output.stderr()).toContain("error: unknown option '--nope'");
+    expect(runCommit).not.toHaveBeenCalled();
+  });
+
+  it('passes everything after "--" to git commit untouched', async () => {
+    await run('-t', 'fix', '--', '-S', '--', 'src/a.ts');
+
+    expect(runCommit).toHaveBeenCalledWith(expect.objectContaining({ gitArgs: ['-S', '--', 'src/a.ts'] }));
+  });
+
+  it('keeps flag values as strings', async () => {
+    await run('-i', '31', '-m', '-fix');
+
+    expect(runCommit).toHaveBeenCalledWith(expect.objectContaining({ preset: { issues: '31', title: '-fix' } }));
   });
 
   it('names the flag in errors about answers given as flags', async () => {

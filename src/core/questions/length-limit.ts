@@ -1,3 +1,5 @@
+import { isDefined } from 'remeda';
+
 import type { LengthLimitInput, LimitLengthInput } from './questions.types';
 
 import { headerPrefixLength } from '../message';
@@ -14,7 +16,7 @@ export const createLengthLimit = ({ config, questions }: LengthLimitInput) => {
       return question.maxLength;
     }
 
-    const bang = asksBreaking && answers.breaking === undefined ? 1 : 0;
+    const bang = asksBreaking && !isDefined(answers.breaking) ? 1 : 0;
     const budget = config.headerMaxLength - headerPrefixLength({ data: answers, config }) - bang;
 
     return Math.max(1, Math.min(question.maxLength ?? budget, budget));

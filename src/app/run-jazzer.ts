@@ -1,3 +1,5 @@
+import { isDefined } from 'remeda';
+
 import type { RunJazzerInput, RunJazzerResult } from './app.types';
 
 import { getTranslations } from '../core/i18n';
@@ -10,6 +12,7 @@ import { getCurrentBranch } from '../io/git';
 import { askQuestions, isPromptAbort } from '../io/prompts';
 import { isTerminalInput } from '../io/terminal';
 import { COMMIT_FIELDS } from '../shared/constants';
+import { MESSAGES } from '../shared/messages';
 import { confirmUntilValid } from './confirm-until-valid';
 import { resolvePreset } from './resolve-preset';
 
@@ -25,7 +28,7 @@ export const runJazzer = async (input: RunJazzerInput = {}): Promise<RunJazzerRe
   const translations = getTranslations(config.language);
   const output = context?.output ?? process.stdout;
   const interactive = input.interactive ?? isTerminalInput(context?.input ?? process.stdin);
-  const policy = resolveRunPolicy({ config, interactive, yes, alias: alias !== undefined, confirm, showBanner });
+  const policy = resolveRunPolicy({ config, interactive, yes, alias: isDefined(alias), confirm, showBanner });
   const preset = resolvePreset({ config, flags, alias });
 
   // Decoration only: never in pipes or scripts. Loaded on use, as figlet reads its fonts from disk.
@@ -74,8 +77,12 @@ export const runJazzer = async (input: RunJazzerInput = {}): Promise<RunJazzerRe
     }
 
     // An alias names itself in the error: the user typed no flag for its answers.
-    if (error instanceof AnswerError && alias !== undefined && flags[error.field] === undefined) {
-      throw new AnswerError({ code: error.code, field: error.field, reason: `${error.reason} (in alias :${alias})` });
+    if (error instanceof AnswerError && isDefined(alias) && !isDefined(flags[error.field])) {
+      throw new AnswerError({
+        code: error.code,
+        field: error.field,
+        reason: MESSAGES.answer.inAlias({ reason: error.reason, alias })
+      });
     }
 
     throw error;

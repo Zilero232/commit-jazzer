@@ -1,4 +1,5 @@
 import { styleText } from 'node:util';
+import { isDefined, isEmpty } from 'remeda';
 
 import type { CommitType } from '../../core/commit-types';
 import type { MessageData } from '../../core/message';
@@ -12,6 +13,7 @@ import {
   SEARCH_PAGE_SIZE,
   validateAnswer
 } from '../../core/questions';
+import { MESSAGES } from '../../shared/messages';
 
 const askSearch = async <Value>({
   message,
@@ -28,7 +30,7 @@ const askSearch = async <Value>({
       source,
       validate,
       pageSize: SEARCH_PAGE_SIZE,
-      ...(suggested === undefined ? {} : { default: suggested })
+      ...(isDefined(suggested) ? { default: suggested } : {})
     },
     context
   );
@@ -36,9 +38,9 @@ const askSearch = async <Value>({
 
 const counter = ({ value, maxLength }: CounterInput) => {
   const { length } = value.trim();
-  const text = maxLength === undefined ? `${length}` : `${length}/${maxLength}`;
+  const text = isDefined(maxLength) ? `${length}/${maxLength}` : `${length}`;
 
-  return styleText(maxLength !== undefined && length > maxLength ? 'red' : 'dim', `(${text})`);
+  return styleText(isDefined(maxLength) && length > maxLength ? 'red' : 'dim', `(${text})`);
 };
 
 /** Asks the questions one by one; the chosen type also brings its emoji and code. */
@@ -69,7 +71,7 @@ export const askQuestions = async ({
   const askText = async ({ question, maxLength }: AskTextInput) => {
     const validate = (value: string) => validateAnswer({ value, question, messages, maxLength, findProfaneWords });
 
-    if (question.choices && question.choices.values.length > 0) {
+    if (question.choices && !isEmpty(question.choices.values)) {
       const source = createChoiceSearch({
         choices: question.choices,
         required: question.required,
@@ -99,7 +101,7 @@ export const askQuestions = async ({
   const answerType = async (commitTypes: CommitType[]) => {
     const given = preset.type ?? (ask === 'all' ? undefined : defaults.type);
 
-    if (given !== undefined) {
+    if (isDefined(given)) {
       const type = commitTypes.find(({ name }) => name === given);
 
       if (!type) {
@@ -114,7 +116,7 @@ export const askQuestions = async ({
     }
 
     if (ask === 'none') {
-      throw new AnswerError({ code: 'missing', field: 'type', reason: 'no answer' });
+      throw new AnswerError({ code: 'missing', field: 'type', reason: MESSAGES.answer.none });
     }
 
     return askSearch({
@@ -140,12 +142,12 @@ export const askQuestions = async ({
     // A required question without an answer is asked whenever there is a terminal.
     const mustAsk = question.required && !fallback;
 
-    if (given !== undefined) {
+    if (isDefined(given)) {
       answers[question.key] = check({ question, value: given, maxLength });
     } else if (ask === 'all' || (ask === 'required' && mustAsk)) {
       answers[question.key] = (await askText({ question, maxLength })).trim();
     } else if (mustAsk) {
-      throw new AnswerError({ code: 'missing', field: question.key, reason: 'no answer' });
+      throw new AnswerError({ code: 'missing', field: question.key, reason: MESSAGES.answer.none });
     } else {
       answers[question.key] = check({ question, value: fallback, maxLength });
     }
@@ -153,7 +155,7 @@ export const askQuestions = async ({
 
   // An answer given up front counts even when its question is not asked; it is held to the same limits.
   extraQuestions
-    .filter(({ key }) => preset[key] !== undefined && !questions.some((question) => question.key === key))
+    .filter(({ key }) => isDefined(preset[key]) && !questions.some((question) => question.key === key))
     .forEach((question) => {
       answers[question.key] = check({
         question: { ...question, required: false },

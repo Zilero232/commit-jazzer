@@ -1,3 +1,5 @@
+import { isDefined, isEmpty } from 'remeda';
+
 import type { CommitType } from '../commit-types';
 import type { BuildQuestionsInput, LocalizeTypesInput, Question } from './questions.types';
 
@@ -24,9 +26,7 @@ const localizeTypes = ({ config, translations }: LocalizeTypesInput): CommitType
 export const buildQuestions = ({ config, translations, keys }: BuildQuestionsInput): Question[] => {
   // A question whose answer the template never writes is not asked: `{{type}}: {{title}}` asks two.
   const written = templateFields(config.template);
-  const asked = new Set(
-    (keys ?? config.availablePromptQuestions).filter((key) => keys !== undefined || written.has(key))
-  );
+  const asked = new Set((keys ?? config.availablePromptQuestions).filter((key) => isDefined(keys) || written.has(key)));
 
   return COMMIT_FIELDS.filter((key) => asked.has(key)).flatMap((key): Question[] => {
     const override = config.baseQuestionsOptions.find((question) => question.key === key);
@@ -57,7 +57,7 @@ export const buildQuestions = ({ config, translations, keys }: BuildQuestionsInp
         required: options.required ?? FIELD_DEFAULTS[key].required,
         minLength: length.minMessageLength ?? 0,
         maxLength: length.maxMessageLength ?? FIELD_DEFAULTS[key].maxLength,
-        ...(key === 'component' && config.scopes.length > 0
+        ...(key === 'component' && !isEmpty(config.scopes)
           ? { choices: { values: config.scopes, allowCustom: config.allowCustomScopes } }
           : {})
       }

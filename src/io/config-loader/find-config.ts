@@ -12,6 +12,7 @@ import type { ExplorerInput, FindConfigInput, FoundConfig, FoundInput } from './
 
 import { ConfigError } from '../../core/config';
 import { PACKAGE_NAME } from '../../shared/constants';
+import { MESSAGES } from '../../shared/messages';
 import { getTopLevel } from '../git';
 import {
   CONFIG_ENV_VARIABLE,
@@ -48,7 +49,9 @@ const withPath =
     try {
       return await loader(filepath, content);
     } catch (error) {
-      throw new ConfigError(`Could not read ${filepath}: ${error instanceof Error ? error.message : String(error)}`);
+      throw new ConfigError(
+        MESSAGES.config.unreadable({ path: filepath, reason: error instanceof Error ? error.message : String(error) })
+      );
     }
   };
 
@@ -77,13 +80,13 @@ export const findConfig = async ({ cwd, configPath, env }: FindConfigInput): Pro
     const path = resolve(cwd, explicit);
 
     if (!existsSync(path)) {
-      throw new ConfigError(`Config file not found: ${path}`);
+      throw new ConfigError(MESSAGES.config.notFound(path));
     }
 
     const result = await explorer({ searchPlaces: CONFIG_FILE_NAMES }).load(path);
 
     if (basename(path) === 'package.json' && isNullish(result?.config)) {
-      throw new ConfigError(`${path} has no "${PACKAGE_JSON_FIELD}" field.`);
+      throw new ConfigError(MESSAGES.config.noField({ path, field: PACKAGE_JSON_FIELD }));
     }
 
     return found({ result, origin: 'explicit' });

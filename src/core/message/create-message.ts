@@ -1,4 +1,4 @@
-import { mapValues } from 'remeda';
+import { isDefined, isEmpty, mapValues } from 'remeda';
 
 import type { CreateMessageInput, CreateMessageResult } from './message.types';
 
@@ -22,14 +22,14 @@ export const createMessage = ({ config, answers, message: given }: CreateMessage
     values: { words: found.join(', ') }
   });
 
-  if (checkHasProfaneWords && found.length > 0) {
+  if (checkHasProfaneWords && !isEmpty(found)) {
     return { status: 'blocked', profaneWords: found, reason };
   }
 
   // Removing wins over masking: a masked word would no longer be found to remove. The answers are cleaned
   // before formatting, so a removed scope leaves no `()` behind.
   if (clearMessage) {
-    if (given !== undefined) {
+    if (isDefined(given)) {
       return { status: 'ok', message: filter.clean(given) };
     }
 

@@ -1,3 +1,5 @@
+import { isEmpty } from 'remeda';
+
 import type { ConfirmUntilValidInput, RunJazzerResult } from './app.types';
 
 import { isConventionalTemplate, lintMessage, stripComments } from '../core/lint';
@@ -31,11 +33,11 @@ export const confirmUntilValid = async ({
 
     issues.forEach((issue) => logger.warn(issue.message));
 
-    if (issues.length === 0 && edited === generated) {
+    if (isEmpty(issues) && edited === generated) {
       return { status: 'ok', message: edited, answers, config };
     }
 
-    if (issues.length === 0) {
+    if (isEmpty(issues)) {
       const result = createMessage({ config, answers, message: edited });
 
       return result.status === 'ok' ? { ...result, answers, config } : result;

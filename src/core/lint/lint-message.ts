@@ -1,5 +1,8 @@
+import { isDefined, isEmpty } from 'remeda';
+
 import type { LintIssue, LintMessageInput, StripCommentsInput } from './lint.types';
 
+import { MESSAGES } from '../../shared/messages';
 import { resolveCommitTypes } from '../commit-types';
 import { FOOTER_LINE } from '../message';
 import { HEADER, SKIPPED } from './lint.constants';
@@ -33,7 +36,7 @@ export const lintMessage = ({ message, config, commentChar }: LintMessageInput):
   const match = HEADER.exec(header);
 
   if (!match?.groups) {
-    return [{ rule: 'header', message: `The first line must look like "type(scope): subject", got "${header}"` }];
+    return [{ rule: 'header', message: MESSAGES.lint.header(header) }];
   }
 
   const { type = '', scope, subject = '' } = match.groups;
@@ -41,26 +44,26 @@ export const lintMessage = ({ message, config, commentChar }: LintMessageInput):
   const issues: LintIssue[] = [];
 
   if (!types.includes(type)) {
-    issues.push({ rule: 'type', message: `Unknown type "${type}". Use one of: ${types.join(', ')}` });
+    issues.push({ rule: 'type', message: MESSAGES.lint.unknownType({ value: type, allowed: types }) });
   }
 
-  if (scope !== undefined && config.scopes.length > 0 && !config.allowCustomScopes && !config.scopes.includes(scope)) {
-    issues.push({ rule: 'scope', message: `Unknown scope "${scope}". Use one of: ${config.scopes.join(', ')}` });
+  if (isDefined(scope) && !isEmpty(config.scopes) && !config.allowCustomScopes && !config.scopes.includes(scope)) {
+    issues.push({ rule: 'scope', message: MESSAGES.lint.unknownScope({ value: scope, allowed: config.scopes }) });
   }
 
   if (!subject.trim()) {
-    issues.push({ rule: 'subject', message: 'The subject after ": " is empty' });
+    issues.push({ rule: 'subject', message: MESSAGES.lint.emptySubject });
   }
 
   if (header.length > config.headerMaxLength) {
     issues.push({
       rule: 'header-length',
-      message: `The first line has ${header.length} characters; at most ${config.headerMaxLength} are allowed`
+      message: MESSAGES.lint.headerLength({ length: header.length, max: config.headerMaxLength })
     });
   }
 
-  if (body.length > 0 && body[0] !== '') {
-    issues.push({ rule: 'body-blank-line', message: 'Leave a blank line after the first line' });
+  if (!isEmpty(body) && body[0] !== '') {
+    issues.push({ rule: 'body-blank-line', message: MESSAGES.lint.blankLine });
   }
 
   if (config.bodyLineLength > 0) {
@@ -68,7 +71,7 @@ export const lintMessage = ({ message, config, commentChar }: LintMessageInput):
       if (line.length > config.bodyLineLength && !FOOTER_LINE.test(line) && !/^\S+$/.test(line.trim())) {
         issues.push({
           rule: 'body-length',
-          message: `Line ${index + 2} has ${line.length} characters; at most ${config.bodyLineLength} are allowed`
+          message: MESSAGES.lint.bodyLength({ line: index + 2, length: line.length, max: config.bodyLineLength })
         });
       }
     });

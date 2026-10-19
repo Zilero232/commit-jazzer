@@ -13,5 +13,5 @@
     "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true
   },
-  "include": ["src", "scripts", "*.config.ts", ".jazzer.config.ts", "docs/.vitepress/**/*.ts"]
+  "include": ["src", "scripts", "*.config.ts", ".jazzer.config.ts", "site/.vitepress/**/*.ts"]
 }

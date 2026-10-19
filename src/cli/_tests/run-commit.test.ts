@@ -2,7 +2,7 @@ import { chmod, mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { CommitOptions } from '../args/cli-args.types';
+import type { CommitOptions } from '../cli.types';
 
 import { captureOutput, createTempDir, useTempRepo } from '../../shared/testing/helpers';
 import { runCommit } from '../commands/commit/run-commit';

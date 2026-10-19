@@ -10,15 +10,15 @@ Asks the questions, shows the message and runs `git commit`. Exits with git's ex
 
 Each flag answers its question, which is then not asked. An empty value (`--breaking ""`) answers with nothing. A flag for a question that is not in `availablePromptQuestions` still goes into the message.
 
-| Option                | Answers                                                       |
-| --------------------- | ------------------------------------------------------------- |
-| `-t, --type <type>`   | Commit type, e.g. `feat`.                                     |
-| `-s, --scope <scope>` | Scope (the component).                                        |
-| `-m, --title <title>` | Title. A title starting with `-` needs the `--title=-x` form. |
-| `-b, --body <text>`   | Description; `\|` starts a new line.                          |
-| `--breaking <text>`   | Breaking change; adds `!` to the header.                      |
-| `-i, --issues <ids>`  | Related issues, e.g. `"12, 34"`.                              |
-| `--comment <text>`    | Extra body paragraph.                                         |
+| Option                | Answers                                  |
+| --------------------- | ---------------------------------------- |
+| `-t, --type <type>`   | Commit type, e.g. `feat`.                |
+| `-s, --scope <scope>` | Scope (the component).                   |
+| `-m, --title <title>` | Title.                                   |
+| `-b, --body <text>`   | Description; `\|` starts a new line.     |
+| `--breaking <text>`   | Breaking change; adds `!` to the header. |
+| `-i, --issues <ids>`  | Related issues, e.g. `"12, 34"`.         |
+| `--comment <text>`    | Extra body paragraph.                    |
 
 Flags are validated like typed answers: an unknown type, a scope outside `scopes` with `allowCustomScopes: false`, a title over the limit, a line break in a header field or parentheses in the scope is an error. So is an answer the template never writes (`--breaking` with a template without `{{breaking}}`), and `--retry` with answers.
 

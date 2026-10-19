@@ -1,9 +1,9 @@
 import { existsSync } from 'node:fs';
 import { chmod, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
-import { isPlainObject } from 'remeda';
+import { isDefined, isEmpty, isPlainObject, keys } from 'remeda';
 
-import type { InitOptions } from '../../args';
+import type { InitOptions } from '../../cli.types';
 import type { HookName } from './init.constants';
 import type { HookInput, InitContext, WriteConfigInput } from './init.types';
 
@@ -11,7 +11,8 @@ import { isConventionalTemplate } from '../../../core/lint';
 import { CONFIG_FILE_NAMES, loadConfig, PACKAGE_JSON_FIELD } from '../../../io/config-loader';
 import { getHooksDir, getTopLevel } from '../../../io/git';
 import { logger } from '../../../io/logger';
-import { PACKAGE_NAME, SCHEMA_URL } from '../../../shared/constants';
+import { SCHEMA_URL } from '../../../shared/constants';
+import { MESSAGES } from '../../../shared/messages';
 import { HOOK_COMMANDS, HOOK_MARKER, HOOKS, INIT_CONFIG_FILES, LOCAL_SCHEMA, TS_CONFIG } from './init.constants';
 
 const hasJazzerField = async (path: string) => {
@@ -45,7 +46,7 @@ const hookPath = async ({ root, inRepository, name }: HookInput) => {
 
   if (hooksDir === join(husky, '_') || (existsSync(husky) && hooksDir !== husky)) {
     if (hooksDir !== join(husky, '_')) {
-      logger.warn('.husky/ exists but git does not use it yet: run `npx husky` once so the hook runs.');
+      logger.warn(MESSAGES.init.huskyInactive);
     }
 
     return join(husky, name);
@@ -65,7 +66,7 @@ const installHook = async (input: HookInput) => {
 
   // A hook someone else wrote is never replaced, --force or not.
   if (existsSync(path) && !(await isOurHook(path))) {
-    logger.error(`${path} already exists. Add this line to it instead: ${PACKAGE_NAME} ${HOOK_COMMANDS[input.name]}`);
+    logger.error(MESSAGES.init.hookExists({ path, command: HOOK_COMMANDS[input.name] }));
 
     return false;
   }
@@ -73,24 +74,23 @@ const installHook = async (input: HookInput) => {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, HOOKS[input.name]);
   await chmod(path, 0o755);
-  logger.success(`Installed ${path}`);
+  logger.success(MESSAGES.init.installed(path));
 
   return true;
 };
 
 const removeHooks = async (context: InitContext) => {
-  const names: HookName[] = ['prepare-commit-msg', 'commit-msg'];
-  const paths = await Promise.all(names.map((name) => hookPath({ ...context, name })));
+  const paths = await Promise.all(keys(HOOKS).map((name) => hookPath({ ...context, name })));
   const ours = await Promise.all(
     paths.map(async (path) => (path && existsSync(path) && (await isOurHook(path)) ? path : undefined))
   );
-  const removed = ours.filter((path) => path !== undefined);
+  const removed = ours.filter(isDefined);
 
   await Promise.all(removed.map((path) => rm(path)));
-  removed.forEach((path) => logger.success(`Removed ${path}`));
+  removed.forEach((path) => logger.success(MESSAGES.init.removed(path)));
 
-  if (removed.length === 0) {
-    logger.info(`No hook from ${PACKAGE_NAME} to remove.`);
+  if (isEmpty(removed)) {
+    logger.info(MESSAGES.init.nothingToRemove);
   }
 };
 
@@ -101,7 +101,7 @@ const writeConfig = async ({ root, ts }: WriteConfigInput) => {
   await writeFile(path, ts ? TS_CONFIG : `${JSON.stringify({ $schema }, null, 2)}\n`);
   // The other variant would shadow or be shadowed by this one.
   await rm(join(root, ts ? INIT_CONFIG_FILES.json : INIT_CONFIG_FILES.ts), { force: true });
-  logger.success(`Created ${path}`);
+  logger.success(MESSAGES.init.created(path));
 };
 
 /**
@@ -117,11 +117,9 @@ export const runInit = async ({
   cwd = process.cwd()
 }: InitOptions): Promise<number> => {
   const topLevel = await getTopLevel({ cwd });
-  const context: InitContext = { root: topLevel ?? cwd, inRepository: topLevel !== undefined };
-  const hooks: HookName[] = [
-    ...(hook ? ['prepare-commit-msg' as const] : []),
-    ...(lint ? ['commit-msg' as const] : [])
-  ];
+  const context: InitContext = { root: topLevel ?? cwd, inRepository: isDefined(topLevel) };
+  const wanted: Record<HookName, boolean> = { 'prepare-commit-msg': hook, 'commit-msg': lint };
+  const hooks = keys(HOOKS).filter((name) => wanted[name]);
 
   if (removeHook) {
     await removeHooks(context);
@@ -129,36 +127,29 @@ export const runInit = async ({
     return 0;
   }
 
-  if (hooks.length > 0 && !context.inRepository) {
-    logger.error('Not inside a git repository: cannot install the hook.');
+  if (!isEmpty(hooks) && !context.inRepository) {
+    logger.error(MESSAGES.init.notInRepository);
 
     return 1;
   }
 
   const [existing] = await findConfigs(context.root);
-  const replaceable =
-    existing !== undefined && new Set<string>(Object.values(INIT_CONFIG_FILES)).has(basename(existing));
+  const replaceable = isDefined(existing) && new Set<string>(Object.values(INIT_CONFIG_FILES)).has(basename(existing));
 
   if (!existing || (force && replaceable)) {
     await writeConfig({ ...context, ts });
-  } else if (hooks.length > 0 && !force) {
+  } else if (!isEmpty(hooks) && !force) {
     // `init --hook` in a configured project only adds the hook.
-    logger.info(`Keeping ${existing}`);
+    logger.info(MESSAGES.init.keeping(existing));
   } else {
-    logger.error(
-      replaceable
-        ? `${existing} already exists. Use --force to replace it.`
-        : `${existing} holds the config already; edit it there.`
-    );
+    logger.error(replaceable ? MESSAGES.init.configExists(existing) : MESSAGES.init.configElsewhere(existing));
 
     return 1;
   }
 
   // The commit-msg hook checks the Conventional Commits format; a template that writes another one would fail it.
   if (lint && !isConventionalTemplate((await loadConfig({ cwd: context.root })).config.template)) {
-    logger.error(
-      'The template does not start with {{type}}, so `jazzer lint` would reject its messages. Not installing the commit-msg hook.'
-    );
+    logger.error(MESSAGES.init.lintNeedsConventional);
 
     return 1;
   }

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { COMMIT_FIELDS, LANGUAGES } from '../../shared/constants';
+import { MESSAGES } from '../../shared/messages';
 import { STYLES } from '../../shared/style';
 import { BUILT_IN_COMMIT_TYPE_NAMES, resolveCommitTypes } from '../commit-types';
 import { DEFAULT_BANNER_TEXT, DEFAULT_PROMPT_QUESTIONS, DEFAULT_TEMPLATE, FIGLET_LAYOUTS } from './config.constants';
@@ -183,7 +184,7 @@ export const configSchema = z
       .array(z.enum(COMMIT_FIELDS))
       .default(DEFAULT_PROMPT_QUESTIONS)
       .refine((questions) => questions.includes('type') && questions.includes('title'), {
-        message: 'Must include "type" and "title": a commit message needs both'
+        message: MESSAGES.config.requiredQuestions
       })
       .meta({
         description: 'Questions to ask, at least `type` and `title`. They are always asked in the built-in order.'
@@ -215,7 +216,7 @@ export const configSchema = z
         context.addIssue({
           code: 'custom',
           path: ['addCustomCommitTypes', name],
-          message: `"${name}": use letters, digits or "_"; Conventional Commits parsers read no "-" in a type`
+          message: MESSAGES.config.typeName(name)
         });
       });
 
@@ -224,7 +225,7 @@ export const configSchema = z
         context.addIssue({
           code: 'custom',
           path: ['aliases', name, 'type'],
-          message: `"${alias.type}" is not an available commit type`
+          message: MESSAGES.config.unknownAliasType(alias.type)
         });
       }
 
@@ -232,7 +233,7 @@ export const configSchema = z
         context.addIssue({
           code: 'custom',
           path: ['aliases', name, 'component'],
-          message: `"${alias.component}" is not in scopes`
+          message: MESSAGES.config.unknownAliasScope(alias.component)
         });
       }
     });

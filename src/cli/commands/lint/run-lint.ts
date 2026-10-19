@@ -1,12 +1,14 @@
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+import { isEmpty } from 'remeda';
 
-import type { LintOptions } from '../../args';
+import type { LintOptions } from '../../cli.types';
 
 import { lintMessage, stripComments } from '../../../core/lint';
 import { loadConfig } from '../../../io/config-loader';
 import { getConfigValue, getGitDir } from '../../../io/git';
 import { logger } from '../../../io/logger';
+import { MESSAGES } from '../../../shared/messages';
 
 /**
  * `jazzer lint [<file>]`: checks a commit message against the config; `.git/COMMIT_EDITMSG` by default.
@@ -17,7 +19,7 @@ export const runLint = async ({ file, configPath, cwd = process.cwd() }: LintOpt
   const path = file ? resolve(cwd, file) : gitDir && join(gitDir, 'COMMIT_EDITMSG');
 
   if (!path) {
-    logger.error('Not inside a git repository: pass the message file, e.g. jazzer lint .git/COMMIT_EDITMSG');
+    logger.error(MESSAGES.lint.notInRepository);
 
     return 1;
   }
@@ -36,11 +38,12 @@ export const runLint = async ({ file, configPath, cwd = process.cwd() }: LintOpt
   const { config } = await loadConfig({ cwd, configPath });
   const issues = lintMessage({ message, config, commentChar });
 
-  issues.forEach(({ message: issue }) => logger.error(issue));
-
-  if (issues.length > 0) {
-    logger.info('Write the message with `jazzer`, or fix it and commit again.');
+  if (isEmpty(issues)) {
+    return 0;
   }
 
-  return issues.length > 0 ? 1 : 0;
+  issues.forEach(({ message: issue }) => logger.error(issue));
+  logger.info(MESSAGES.lint.hint);
+
+  return 1;
 };

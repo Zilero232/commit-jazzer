@@ -1,7 +1,8 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { isDefined } from 'remeda';
 
-import type { CommitOptions } from '../../args';
+import type { CommitOptions } from '../../cli.types';
 import type { IsPathspecInput, ResolvedMessage, StageCheckInput } from './commit.types';
 
 import { exitCodeOf, reportResult, runJazzer } from '../../../app';
@@ -15,6 +16,7 @@ import {
   saveLastMessage
 } from '../../../io/git';
 import { logger } from '../../../io/logger';
+import { MESSAGES } from '../../../shared/messages';
 import { COMMITS_WITHOUT_STAGE } from './commit.constants';
 
 // A file after `--` commits that file whether it is staged or not: changed, or deleted and still known to git.
@@ -37,7 +39,7 @@ const resolveMessage = async (options: CommitOptions): Promise<ResolvedMessage> 
     const message = await readLastMessage({ cwd: options.cwd });
 
     if (!message) {
-      logger.error('No message to retry: --retry reuses the message of the last `jazzer` commit that failed.');
+      logger.error(MESSAGES.commit.noRetryMessage);
     }
 
     return { message, code: 1 };
@@ -62,14 +64,14 @@ export const runCommit = async (options: CommitOptions): Promise<number> => {
 
   if (!dryRun) {
     if (!(await isInsideWorkTree({ cwd }))) {
-      logger.error('Not inside a git repository.');
+      logger.error(MESSAGES.commit.notInRepository);
 
       return 1;
     }
 
     // Fail before the questions, not after them.
     if (!(await canCommitWithoutStage({ gitArgs, cwd })) && !(await hasStagedChanges({ cwd }))) {
-      logger.error('Nothing to commit: stage your changes with `git add` first, or pass --all.');
+      logger.error(MESSAGES.commit.nothingStaged);
 
       return 1;
     }
@@ -77,7 +79,7 @@ export const runCommit = async (options: CommitOptions): Promise<number> => {
 
   const { message, code: failure } = await resolveMessage(options);
 
-  if (message === undefined) {
+  if (!isDefined(message)) {
     return failure;
   }
 
@@ -90,7 +92,7 @@ export const runCommit = async (options: CommitOptions): Promise<number> => {
   const messageFile = await saveLastMessage({ message, cwd });
 
   if (!messageFile) {
-    logger.error('Could not find the .git directory to write the message to.');
+    logger.error(MESSAGES.commit.noGitDir);
 
     return 1;
   }
@@ -101,7 +103,7 @@ export const runCommit = async (options: CommitOptions): Promise<number> => {
   if (code === 0 && !gitArgs.includes('--dry-run')) {
     await clearLastMessage({ cwd });
   } else if (code !== 0) {
-    logger.warn('git commit failed. Fix the problem and run `jazzer --retry` to commit the same message.');
+    logger.warn(MESSAGES.commit.failed);
   }
 
   return code;

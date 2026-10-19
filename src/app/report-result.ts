@@ -4,6 +4,7 @@ import type { ReportErrorInput, RunJazzerResult } from './app.types';
 
 import { AnswerError } from '../core/questions';
 import { logger } from '../io/logger';
+import { MESSAGES } from '../shared/messages';
 
 /** Logs why there is no message; returns the message when there is one. */
 export const reportResult = (result: RunJazzerResult): string | undefined =>
@@ -15,7 +16,7 @@ export const reportResult = (result: RunJazzerResult): string | undefined =>
       return undefined;
     })
     .with({ status: 'cancelled' }, () => {
-      logger.warn('Commit cancelled.');
+      logger.warn(MESSAGES.commit.cancelled);
 
       return undefined;
     })
@@ -28,7 +29,9 @@ export const exitCodeOf = (result: RunJazzerResult): number =>
 /** Logs an error from the flow (a ConfigError, an AnswerError, …) and returns the exit code. */
 export const reportError = ({ error, describe }: ReportErrorInput): number => {
   if (error instanceof AnswerError) {
-    logger.error(describe?.(error) ?? (error.code === 'missing' ? `Missing answer: ${error.field}` : error.message));
+    logger.error(
+      describe?.(error) ?? (error.code === 'missing' ? MESSAGES.answer.missing(error.field) : error.message)
+    );
   } else if (error instanceof Error) {
     logger.error(error.message);
   } else {

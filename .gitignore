@@ -39,6 +39,6 @@ mise.local.toml
 Thumbs.db
 
 # Docs site (the schema copy is generated)
-docs/.vitepress/cache/
-docs/.vitepress/dist/
-docs/public/commit-jazzer-schema.json
+site/.vitepress/cache/
+site/.vitepress/dist/
+site/public/commit-jazzer-schema.json

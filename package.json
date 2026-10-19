@@ -29,7 +29,15 @@
     "gitmoji",
     "emoji",
     "prepare-commit-msg",
-    "cli"
+    "cli",
+    "commit-message",
+    "commitizen-adapter",
+    "git-hooks",
+    "commit-msg",
+    "husky",
+    "conventional-changelog",
+    "emoji-commits",
+    "commit-helper"
   ],
   "exports": {
     ".": {
@@ -61,8 +69,8 @@
   },
   "scripts": {
     "build": "bun scripts/generate-schema.ts && tsdown",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
+    "docs:dev": "vitepress dev site",
+    "docs:build": "vitepress build site",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format:check": "prettier --check .",
@@ -77,10 +85,12 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@commander-js/extra-typings": "^15.0.0",
     "@inquirer/editor": "^5.3.4",
     "@inquirer/input": "^5.1.7",
     "@inquirer/search": "^4.3.4",
     "@inquirer/select": "^5.2.6",
+    "commander": "^15.0.0",
     "figlet": "^1.12.0",
     "fuse.js": "^7.5.0",
     "handlebars": "^4.7.10",
@@ -117,6 +127,7 @@
     "tsdown": "^0.23.1",
     "typescript": "~6.0.3",
     "vitepress": "^1.6.4",
+    "vitepress-plugin-llms": "^1.14.0",
     "vitest": "^5.0.5"
   },
   "lint-staged": {

@@ -1,3 +1,5 @@
+import { isEmpty } from 'remeda';
+
 import type { CommitType, ResolveCommitTypesInput } from './commit-types.types';
 
 import { DEFAULT_COMMIT_TYPES } from './commit-types.constants';
@@ -14,7 +16,7 @@ export const resolveCommitTypes = ({
   const customNames = new Set(Object.keys(addCustomCommitTypes));
 
   const builtIn = DEFAULT_COMMIT_TYPES.filter(
-    ({ name }) => (availableCommitTypes.length === 0 || availableCommitTypes.includes(name)) && !customNames.has(name)
+    ({ name }) => (isEmpty(availableCommitTypes) || availableCommitTypes.includes(name)) && !customNames.has(name)
   ).map((type) => ({ ...type, ...baseCommitTypes[type.name] }));
 
   const custom = Object.entries(addCustomCommitTypes).map(([name, type]) => ({ name, ...type }));

@@ -6,7 +6,7 @@ Interactive Conventional Commits with emoji: a CLI (`jazzer`), a `prepare-commit
 
 - `bun run verify` typecheck + lint + format check + spelling + knip; `bun run fix` applies lint and format fixes
 - `bun run test` runs Vitest (never `bun test`); `bun run build` builds `dist/` and the JSON Schema
-- `bun run docs:dev` / `docs:build` for the VitePress site in `docs/`
+- `bun run docs:dev` / `docs:build` for the VitePress site: pages in `docs/`, the site itself (config, theme, components, `public/`) in `site/`
 - Toolchain from `mise.toml`; run tools through `mise x --` when they are not on PATH
 
 ## Code

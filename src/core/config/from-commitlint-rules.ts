@@ -1,3 +1,5 @@
+import { isEmpty, isNullish, omitBy } from 'remeda';
+
 import type { JazzerConfig } from './config.types';
 
 import { BUILT_IN_COMMIT_TYPE_NAMES } from '../commit-types';
@@ -30,12 +32,17 @@ export const fromCommitlintRules = (rules: Record<string, unknown>): Partial<Jaz
   const headerMaxLength = positiveInt(ruleValue(rules['header-max-length']));
   const bodyLineLength = positiveInt(ruleValue(rules['body-max-line-length']));
 
-  return {
-    ...(types.length > 0 ? { availableCommitTypes: types } : {}),
-    ...(isStringArray(scopes) && scopes.length > 0
-      ? { scopes, allowCustomScopes: !(Array.isArray(scopeRule) && scopeRule[0] === 2) }
-      : {}),
-    ...(headerMaxLength ? { headerMaxLength } : {}),
-    ...(bodyLineLength ? { bodyLineLength } : {})
-  };
+  const hasScopes = isStringArray(scopes) && !isEmpty(scopes);
+
+  return omitBy(
+    {
+      availableCommitTypes: isEmpty(types) ? undefined : types,
+      scopes: hasScopes ? scopes : undefined,
+      // Custom scopes stay allowed unless the rule is an error.
+      allowCustomScopes: hasScopes ? !(Array.isArray(scopeRule) && scopeRule[0] === 2) : undefined,
+      headerMaxLength,
+      bodyLineLength
+    },
+    isNullish
+  );
 };

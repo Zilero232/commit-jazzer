@@ -5,6 +5,7 @@ import { isPlainObject } from 'remeda';
 
 import type { LoadCommitlintRulesInput } from './config-loader.types';
 
+import { MESSAGES } from '../../shared/messages';
 import { logger } from '../logger';
 
 // `@commitlint/load` straight from the project, or through `@commitlint/cli`, where pnpm keeps it.
@@ -51,7 +52,7 @@ export const loadCommitlintRules = async ({
     return isPlainObject(config) && isPlainObject(config.rules) ? config.rules : undefined;
   } catch (error) {
     logger.warn(
-      `Skipping the commitlint config: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`
+      MESSAGES.config.commitlintSkipped(error instanceof Error ? (error.message.split('\n')[0] ?? '') : String(error))
     );
 
     return undefined;

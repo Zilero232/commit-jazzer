@@ -1,5 +1,5 @@
 // The JSON Schema of the config, generated from the zod schema. `bun run build` writes `schema.json`, shipped
-// as `commit-jazzer/schema.json`; the VitePress config writes the docs copy, served at the `$schema` URL
+// as `commit-jazzer/schema.json`; the VitePress config writes the site copy, served at the `$schema` URL
 // `jazzer init` writes and rendered by the config reference page.
 import { writeFile } from 'node:fs/promises';
 import { z } from 'zod';
@@ -8,7 +8,7 @@ import { configSchema } from '../src/core/config/config.schema';
 
 const OUTPUTS = {
   package: new URL('../schema.json', import.meta.url),
-  docs: new URL('../docs/public/commit-jazzer-schema.json', import.meta.url)
+  site: new URL('../site/public/commit-jazzer-schema.json', import.meta.url)
 };
 
 export const writeSchema = async (target: keyof typeof OUTPUTS): Promise<void> => {

@@ -1,3 +1,5 @@
+import { isDefined, isEmpty } from 'remeda';
+
 import type { ValidateAnswerInput } from './questions.types';
 
 import { interpolate } from '../i18n';
@@ -37,13 +39,13 @@ export const validateAnswer = ({
     return interpolate({ text: messages.minLength, values: { min: question.minLength } });
   }
 
-  if (maxLength !== undefined && length > maxLength) {
+  if (isDefined(maxLength) && length > maxLength) {
     return interpolate({ text: messages.maxLength, values: { max: maxLength } });
   }
 
   const profaneWords = findProfaneWords?.(answer) ?? [];
 
-  if (profaneWords.length > 0) {
+  if (!isEmpty(profaneWords)) {
     return interpolate({ text: messages.prohibitedWords, values: { words: profaneWords.join(', ') } });
   }
 

@@ -1,5 +1,6 @@
 import figlet from 'figlet';
 import { styleText } from 'node:util';
+import { isEmpty, isTruthy } from 'remeda';
 import stringWidth from 'string-width';
 
 import type { PaintInput, RenderBannerInput } from './banner.types';
@@ -12,20 +13,21 @@ export const renderBanner = ({ banner, colors }: RenderBannerInput): string => {
 
   const paint = ({ style, text }: PaintInput) => (colors ? styleText(style, text, { validateStream: false }) : text);
 
-  const art = bannerText ? figlet.textSync(bannerText, figletOptions).replace(/\s+$/, '') : '';
-  const lines = [...(art ? art.split('\n') : []), ...options.footerMessages.map(({ text }) => text)];
-  const width = Math.max(1, ...lines.map((line) => stringWidth(line)));
-  const separator = paint({ style: options.separatorColor, text: fillWidth({ pattern: options.separator, width }) });
+  const art = bannerText ? figlet.textSync(bannerText, figletOptions).trimEnd() : '';
+  const footer = options.footerMessages;
+  // Both separators span the widest line of the art and the footer.
+  const width = Math.max(
+    1,
+    ...[...art.split('\n'), ...footer.map(({ text }) => text)].map((line) => stringWidth(line))
+  );
+  const rule = (pattern: string) => paint({ style: options.separatorColor, text: fillWidth({ pattern, width }) });
 
-  return [
-    ...(art ? [paint({ style: options.color, text: art })] : []),
-    separator,
-    ...(options.footerMessages.length > 0
-      ? [
-          ...options.footerMessages.map(({ text, color }) => paint({ style: color ?? 'white', text })),
-          paint({ style: options.separatorColor, text: fillWidth({ pattern: options.footerSeparator, width }) })
-        ]
-      : []),
-    ...Array.from({ length: options.bottomSpacing }).fill('')
-  ].join('\n');
+  const lines = [
+    art && paint({ style: options.color, text: art }),
+    rule(options.separator),
+    ...footer.map(({ text, color = 'white' }) => paint({ style: color, text })),
+    !isEmpty(footer) && rule(options.footerSeparator)
+  ].filter(isTruthy);
+
+  return lines.join('\n') + '\n'.repeat(options.bottomSpacing);
 };
