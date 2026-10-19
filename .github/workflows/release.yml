@@ -1,0 +1,56 @@
+name: Release
+
+# Every push to main: CI first, then semantic-release. It reads the commits since the last tag, picks the
+# version (feat → minor, fix → patch, a breaking change → major), publishes to npm, commits CHANGELOG.md and
+# package.json, tags and creates the GitHub release. Commits that need no release (docs, chore, …) publish nothing.
+#
+# npm trusts this file by name (trusted publishing): renaming it means updating the trusted publisher on npm.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  HUSKY: 0
+
+# One release at a time, and never cancelled half-way: a newer push waits for the running one.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  publish:
+    name: Publish
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # The tag, the release commit, the GitHub release and the comments go through GH_TOKEN,
+    # so the job token itself needs no write access.
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing and provenance
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # No caches: a poisoned cache must not reach the job that publishes.
+      - uses: ./.github/actions/setup
+        with:
+          cache: 'false'
+
+      # `npm publish` builds again through prepublishOnly, after the version bump, so --version is right.
+      - name: semantic-release
+        run: bunx semantic-release
+        env:
+          # A fine-grained token for this repository: Contents, Issues and Pull requests read/write. It must be
+          # allowed to push to main, because the release commit updates CHANGELOG.md and package.json.
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

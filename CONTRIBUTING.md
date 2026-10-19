@@ -55,7 +55,17 @@ src/
 
 Commit messages follow Conventional Commits, checked by commitlint. Use the tool itself: `bun run commit`.
 
-Before opening a pull request, run `bun run verify` and `bun run test`, and add tests for the change. Releases are made by semantic-release from the commits on `main`.
+Before opening a pull request, run `bun run verify` and `bun run test`, and add tests for the change.
+
+## CI and releases
+
+| Workflow                                 | Runs on                | Does                                                                              |
+| ---------------------------------------- | ---------------------- | --------------------------------------------------------------------------------- |
+| [CI](.github/workflows/ci.yml)           | pull requests          | verify, build, tests on Node 22.13/24/26, a smoke test of the built CLI           |
+| [Release](.github/workflows/release.yml) | every push to `main`   | CI, then semantic-release: version from the commits, npm, CHANGELOG, tag, release |
+| [Docs](.github/workflows/docs.yml)       | docs changes, releases | builds the site; on `main` deploys it to GitHub Pages                             |
+
+The version comes from the commit types since the last tag: `feat` is a minor, `fix`, `perf`, `refactor` and `upgrade` a patch, `!` or `BREAKING CHANGE:` a major; `docs`, `chore`, `test` and `ci` release nothing. npm trusts `release.yml` by name (trusted publishing), so renaming it means updating the trusted publisher in the package settings on npm.
 
 ## Code of Conduct
 

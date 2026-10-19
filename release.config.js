@@ -51,6 +51,10 @@ export default {
         message: 'chore(release): 🔖 ${nextRelease.version} [skip ci]'
       }
     ],
-    '@semantic-release/github'
+    [
+      '@semantic-release/github',
+      // A failed release shows up as a red CI run; no issue labelled "semantic-release" on top of it.
+      { failTitle: false, failComment: false }
+    ]
   ]
 };

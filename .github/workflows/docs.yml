@@ -45,6 +45,7 @@ concurrency:
 
 jobs:
   build:
+    name: Build site
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -57,7 +58,8 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup
 
-      - run: bun run docs:build
+      - name: Build
+        run: bun run docs:build
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -66,6 +68,7 @@ jobs:
 
   # Only this job can write, and it runs no project code: it publishes the files the build produced.
   deploy:
+    name: Deploy to GitHub Pages
     needs: build
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest

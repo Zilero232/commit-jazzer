@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/commit-jazzer"><img src="https://img.shields.io/npm/v/commit-jazzer?color=7c3aed&logo=npm" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/commit-jazzer"><img src="https://img.shields.io/npm/dm/commit-jazzer?color=7c3aed" alt="npm downloads"></a>
-  <a href="https://github.com/Zilero232/commit-jazzer/actions/workflows/checks.yml"><img src="https://img.shields.io/github/actions/workflow/status/Zilero232/commit-jazzer/checks.yml?branch=main&label=checks&logo=github" alt="checks"></a>
+  <a href="https://github.com/Zilero232/commit-jazzer/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/Zilero232/commit-jazzer/release.yml?branch=main&label=release&logo=github" alt="release"></a>
   <a href="https://www.conventionalcommits.org"><img src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196?logo=conventionalcommits&logoColor=white" alt="Conventional Commits"></a>
   <a href="LICENSE"><img src="https://img.shields.io/npm/l/commit-jazzer?color=7c3aed" alt="license"></a>
 </p>

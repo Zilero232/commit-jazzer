@@ -1,0 +1,81 @@
+name: CI
+
+# Verifies and tests a pull request. The release workflow runs this same file first on every push to main,
+# so main is never released without passing it.
+on:
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+permissions: {}
+
+# The repo's own git hooks (husky) have no business in CI.
+env:
+  HUSKY: 0
+
+concurrency:
+  # The release workflow passes its own group; on a pull request the newest push wins.
+  group: ci-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+
+      - name: Typecheck, lint, format, spelling, unused code
+        run: bun run verify
+      # publint runs as part of the build and fails it on packaging mistakes.
+      - name: Build
+        run: bun run build
+
+      # The build tools need a newer Node than the lowest one the package supports, so the
+      # matrix below tests this build instead of making its own.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist
+          path: dist
+
+  test:
+    name: Test (Node ${{ matrix.node }})
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # The lowest supported version (engines), the active LTS and the current release.
+        node: ['22.13', '24', '26']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Unit and integration tests
+        run: bun run test:coverage
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist
+
+      # The published CLI on this Node version, without a terminal: every required answer comes from a flag.
+      - name: Smoke test the built CLI
+        run: |
+          node dist/cli.mjs --version
+          node dist/cli.mjs --dry-run -t feat -s ci -m "smoke test" -i 7 | tee message.txt
+          printf 'feat(ci): ✨ smoke test\n\nCloses #7\n' | diff - message.txt
+          node -e "require('./index.cjs').prompter.constructor.name === 'AsyncFunction' || process.exit(1)"

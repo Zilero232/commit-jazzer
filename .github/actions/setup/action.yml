@@ -6,7 +6,7 @@ inputs:
     description: Overrides the Node version from mise.toml (the test matrix uses it).
     required: false
   cache:
-    description: Use the tool and package caches. The release job turns them off, so a poisoned cache cannot reach it.
+    description: Use the tool and package caches. The publish job turns them off, so a poisoned cache cannot reach it.
     default: 'true'
 
 runs:
