@@ -6,15 +6,9 @@
 the questions, the config validation and the JavaScript API changed; see
 https://zilero232.github.io/commit-jazzer/guide/migration
 
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-
 ### Features
 
 * ✨ rewrite commit-jazzer from scratch ([7210ae5](https://github.com/Zilero232/commit-jazzer/commit/7210ae501076486bcb36650a06fe56e2d53204bc))
-
-### Bug Fixes
-
-* **deps:** 🤖 update dependencies dependency inquirer to v8.2.7 ([#34](https://github.com/Zilero232/commit-jazzer/issues/34)) ([8cf2ec3](https://github.com/Zilero232/commit-jazzer/commit/8cf2ec3623878e0c5f7f36b0dff63a33716efc96))
 
 ### Refactoring
 
