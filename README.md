@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://zilero232.github.io/commit-jazzer/logo.svg" alt="" width="88" height="88">
-</p>
-
 <h1 align="center">commit-jazzer</h1>
 
 <p align="center">
@@ -18,7 +14,11 @@
 </p>
 
 <p align="center">
-  <a href="https://zilero232.github.io/commit-jazzer/">Documentation</a> ·
+  <a href="https://zilero232.github.io/commit-jazzer/"><img src="https://img.shields.io/badge/Documentation-zilero232.github.io%2Fcommit--jazzer-7c3aed?style=for-the-badge&logo=vitepress&logoColor=white" alt="Documentation: zilero232.github.io/commit-jazzer"></a>
+</p>
+
+<p align="center">
+  <a href="https://zilero232.github.io/commit-jazzer/guide/getting-started">Getting started</a> ·
   <a href="https://zilero232.github.io/commit-jazzer/playground">Playground</a> ·
   <a href="https://zilero232.github.io/commit-jazzer/reference/config">Config options</a> ·
   <a href="https://zilero232.github.io/commit-jazzer/reference/cli">CLI</a>

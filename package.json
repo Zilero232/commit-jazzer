@@ -1,44 +1,46 @@
 {
   "name": "commit-jazzer",
-  "type": "module",
   "version": "2.0.0",
-  "packageManager": "bun@1.3.14",
   "description": "Conventional Commits with emoji: an interactive CLI, a git hook and a Commitizen adapter. Fuzzy type search, scopes, breaking changes, issue footers, 13 languages and a typed config.",
-  "author": {
-    "name": "Artemev Alexandr",
-    "url": "https://github.com/Zilero232"
-  },
-  "license": "MIT",
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/sponsors/Zilero232"
-  },
+  "keywords": [
+    "cli",
+    "commit",
+    "commit-helper",
+    "commit-message",
+    "commit-msg",
+    "commitizen",
+    "commitizen-adapter",
+    "commitlint",
+    "conventional-changelog",
+    "conventional-commits",
+    "cz-adapter",
+    "emoji",
+    "emoji-commits",
+    "git",
+    "git-hooks",
+    "gitmoji",
+    "husky",
+    "prepare-commit-msg",
+    "semantic-release"
+  ],
   "homepage": "https://zilero232.github.io/commit-jazzer/",
+  "bugs": {
+    "url": "https://github.com/Zilero232/commit-jazzer/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Zilero232/commit-jazzer.git"
   },
-  "keywords": [
-    "git",
-    "commit",
-    "conventional-commits",
-    "commitizen",
-    "cz-adapter",
-    "commitlint",
-    "semantic-release",
-    "gitmoji",
-    "emoji",
-    "prepare-commit-msg",
-    "cli",
-    "commit-message",
-    "commitizen-adapter",
-    "git-hooks",
-    "commit-msg",
-    "husky",
-    "conventional-changelog",
-    "emoji-commits",
-    "commit-helper"
-  ],
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/Zilero232"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Artemev Alexandr",
+    "url": "https://github.com/Zilero232"
+  },
+  "type": "module",
   "exports": {
     ".": {
       "import": {
@@ -64,25 +66,29 @@
     "index.d.cts",
     "schema.json"
   ],
-  "engines": {
-    "node": ">=22.13.0"
-  },
   "scripts": {
     "build": "bun scripts/generate-schema.ts && tsdown",
-    "docs:dev": "vitepress dev site",
+    "commit": "bun run build && node ./dist/cli.mjs",
     "docs:build": "vitepress build site",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "docs:dev": "vitepress dev site",
+    "fix": "eslint . --fix && prettier --write .",
     "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "prepare": "husky",
+    "prepublishOnly": "bun run build",
     "spell": "cspell lint --config ./cspell.json --gitignore --no-progress --no-must-find-files .",
     "test": "vitest run",
-    "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "verify": "bun run typecheck && bun run lint && bun run format:check && bun run spell && knip",
-    "fix": "eslint . --fix && prettier --write .",
-    "commit": "bun run build && node ./dist/cli.mjs",
-    "prepublishOnly": "bun run build",
-    "prepare": "husky"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "verify": "bun run typecheck && bun run lint && bun run format:check && bun run spell && knip"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs,ts,mts,cts}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": "prettier --write"
   },
   "dependencies": {
     "@commander-js/extra-typings": "^15.0.0",
@@ -120,6 +126,7 @@
     "knip": "^6.42.0",
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.10",
+    "prettier-plugin-packagejson": "^3.0.2",
     "publint": "^0.3.25",
     "remeda": "^2.52.0",
     "semantic-release": "^25.0.9",
@@ -130,12 +137,9 @@
     "vitepress-plugin-llms": "^1.14.0",
     "vitest": "^5.0.5"
   },
-  "lint-staged": {
-    "*.{js,mjs,cjs,ts,mts,cts}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,yml,yaml}": "prettier --write"
+  "packageManager": "bun@1.3.14",
+  "engines": {
+    "node": ">=22.13.0"
   },
   "publishConfig": {
     "access": "public",
