@@ -26,7 +26,8 @@ const COMMIT_TYPES = [
 ];
 
 const RELEASE_RULES = [
-  // Rules are checked in order and the first match wins, so breaking changes go first.
+  // A commit gets the biggest release among the rules it matches. Our rules replace the analyzer's defaults,
+  // so the breaking-change rule must be here too.
   { breaking: true, release: 'major' },
   { type: 'docs', scope: 'readme', release: 'patch' },
   ...COMMIT_TYPES.filter(({ release }) => release).map(({ type, release }) => ({ type, release }))
