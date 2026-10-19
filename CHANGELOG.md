@@ -1,3 +1,30 @@
+## [2.0.0](https://github.com/Zilero232/commit-jazzer/compare/v1.1.5...v2.0.0) (2026-10-19)
+
+### ⚠ BREAKING CHANGES
+
+* requires Node.js 22.13 or newer. The default message format,
+the questions, the config validation and the JavaScript API changed; see
+https://zilero232.github.io/commit-jazzer/guide/migration
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+### Features
+
+* ✨ rewrite commit-jazzer from scratch ([7210ae5](https://github.com/Zilero232/commit-jazzer/commit/7210ae501076486bcb36650a06fe56e2d53204bc))
+
+### Bug Fixes
+
+* **deps:** 🤖 update dependencies dependency inquirer to v8.2.7 ([#34](https://github.com/Zilero232/commit-jazzer/issues/34)) ([8cf2ec3](https://github.com/Zilero232/commit-jazzer/commit/8cf2ec3623878e0c5f7f36b0dff63a33716efc96))
+
+### Refactoring
+
+* ♻️ trim the public API and package.json ([48dcb67](https://github.com/Zilero232/commit-jazzer/commit/48dcb672b99d6844d2db8daffe2ea88c2e17f36e))
+* **cli:** ♻️ move the CLI to commander and gather the messages ([87ed8a4](https://github.com/Zilero232/commit-jazzer/commit/87ed8a4ad52f82b8df00917f86518799aabe6184))
+
+### Documentation
+
+* 📝 rewrite the README around a recorded demo ([55bc354](https://github.com/Zilero232/commit-jazzer/commit/55bc3547541afac35b76473b65b424b443cb639e))
+
 ## [1.1.5](https://github.com/Zilero232/commit-jazzer/compare/v1.1.4...v1.1.5) (2025-02-28)
 
 ## [1.1.4](https://github.com/Zilero232/commit-jazzer/compare/v1.1.3...v1.1.4) (2025-02-28)
