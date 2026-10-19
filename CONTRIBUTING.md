@@ -65,7 +65,7 @@ Before opening a pull request, run `bun run verify` and `bun run test`, and add 
 | [Release](.github/workflows/release.yml) | every push to `main`   | CI, then semantic-release: version from the commits, npm, CHANGELOG, tag, release |
 | [Docs](.github/workflows/docs.yml)       | docs changes, releases | builds the site; on `main` deploys it to GitHub Pages                             |
 
-The version comes from the commit types since the last tag: `!` or `BREAKING CHANGE:` is a major, `feat` a minor, `fix`, `perf`, `refactor`, `security`, `revert`, `remove`, `upgrade`, `downgrade`, `build` and `docs(readme)` a patch; `docs`, `chore`, `test`, `ci` and `style` release nothing. The table in [release.config.js](release.config.js) is the source of truth. npm trusts `release.yml` by name (trusted publishing), so renaming it means updating the trusted publisher in the package settings on npm.
+The version comes from the commit types since the last tag: `!` or `BREAKING CHANGE:` is a major, `feat` a minor, `fix`, `perf`, `refactor`, `security`, `revert`, `remove`, `upgrade`, `downgrade`, `build` and `docs(readme)` a patch; `docs`, `chore`, `test`, `ci` and `style` release nothing. The table in [release.config.ts](release.config.ts) is the source of truth. npm trusts `release.yml` by name (trusted publishing), so renaming it means updating the trusted publisher in the package settings on npm.
 
 ## Code of Conduct
 

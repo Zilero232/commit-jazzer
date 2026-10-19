@@ -1,3 +1,5 @@
+import type { Options } from 'semantic-release';
+
 // How a push to main becomes a release: semantic-release reads the commits since the last tag,
 // picks the next version from their types, publishes to npm and writes the changelog.
 
@@ -8,7 +10,7 @@
  * A breaking change (`feat!:`, `BREAKING CHANGE:`) is a major whatever its type.
  * Types not listed here (chore, ci, test, style, …) neither release nor show up in the notes.
  */
-const COMMIT_TYPES = [
+const COMMIT_TYPES: { type: string; section: string; release: 'major' | 'minor' | 'patch' | null }[] = [
   { type: 'breaking', section: 'Breaking Changes', release: 'major' },
   { type: 'feat', section: 'Features', release: 'minor' },
   { type: 'fix', section: 'Bug Fixes', release: 'patch' },
@@ -39,7 +41,6 @@ const PRESET = {
   presetConfig: { types: COMMIT_TYPES.map(({ type, section }) => ({ type, section })) }
 };
 
-/** @type {import('semantic-release').GlobalConfig} */
 export default {
   branches: ['main'],
   plugins: [
@@ -65,4 +66,4 @@ export default {
     //    A failed release is a red CI run already, so it opens no issue.
     ['@semantic-release/github', { failTitle: false, failComment: false }]
   ]
-};
+} satisfies Options;
