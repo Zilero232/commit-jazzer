@@ -1,1050 +1,510 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
+    "$schema": {
+      "description": "JSON Schema for editor autocompletion.",
+      "type": "string"
+    },
     "language": {
-      "description": "Language.",
       "default": "en",
+      "description": "Language of the prompts.",
+      "type": "string",
       "enum": [
         "en",
+        "ru",
         "es",
-        "ru"
-      ],
-      "type": "string"
+        "de",
+        "fr",
+        "it",
+        "pt",
+        "pl",
+        "tr",
+        "uk",
+        "zh",
+        "ja",
+        "ko"
+      ]
     },
     "template": {
-      "description": "Format message.",
-      "default": "\"{{type}}: {{emoji}} - {{title}}\";",
+      "default": "{{type}}{{scope}}{{bang}}: {{emoji}} {{title}}\n\n{{description}}\n\n{{comment}}\n\n{{#if breaking}}BREAKING CHANGE: {{breaking}}{{/if}}\n{{issueFooter}}",
+      "description": "Handlebars template of the commit message. Available: `type`, `emoji`, `code`, `component`, `scope` (the component in parentheses), `bang` (`!` for breaking changes), `title`, `description`, `comment`, `breaking`, `issues`, `issuePrefix` and `issueFooter` (one `<issuePrefix> <issue>` line per issue).",
+      "examples": [
+        "{{type}}{{scope}}{{bang}}: {{code}} {{title}}"
+      ],
+      "type": "string",
+      "minLength": 1
+    },
+    "headerMaxLength": {
+      "default": 100,
+      "description": "Maximum length of the first line. The title counter accounts for the type, scope and emoji.",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "bodyLineLength": {
+      "default": 100,
+      "description": "Wrap body lines at this width; `0` turns wrapping off. Footer lines are never wrapped.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "breaklineChar": {
+      "default": "|",
+      "description": "Typing this in the description starts a new line; an empty string turns it off.",
       "type": "string"
     },
-    "availableCommitTypes": {
-      "description": "The types that will be shown in the list of type selections.",
+    "lowercaseTitle": {
+      "default": true,
+      "description": "Lower-case the first letter of the title and drop a trailing period, as commitlint expects.",
+      "type": "boolean"
+    },
+    "scopes": {
       "default": [],
+      "description": "Scopes offered with autocompletion in the component question. Free text when empty.",
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "allowCustomScopes": {
+      "default": true,
+      "description": "Accept a scope that is not in `scopes`.",
+      "type": "boolean"
+    },
+    "issuePrefix": {
+      "default": "Closes",
+      "description": "Footer token written before each related issue.",
+      "type": "string",
+      "minLength": 1
+    },
+    "inferFromBranch": {
+      "default": true,
+      "description": "In a terminal, suggest the type and the issue from the branch name, e.g. `feat/PROJ-12-login`.",
+      "type": "boolean"
+    },
+    "useCommitlint": {
+      "default": true,
+      "description": "Take `scopes` and the length limits from the commitlint config when this config does not set them.",
+      "type": "boolean"
+    },
+    "aliases": {
+      "default": {},
+      "description": "Ready answers for frequent commits: `jazzer :name` commits them without questions.",
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[\\w-]+$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Commit type."
+          },
+          "component": {
+            "description": "Scope.",
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Title."
+          },
+          "description": {
+            "description": "Description.",
+            "type": "string"
+          },
+          "breaking": {
+            "description": "Breaking change.",
+            "type": "string"
+          },
+          "issues": {
+            "description": "Related issues.",
+            "type": "string"
+          },
+          "comment": {
+            "description": "Extra body paragraph.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title"
+        ],
+        "additionalProperties": false,
+        "description": "Answers for a commit made often, used with `jazzer :name`."
+      }
+    },
+    "confirmCommit": {
+      "default": true,
+      "description": "Show the final message and ask to commit, edit it in $EDITOR or cancel.",
+      "type": "boolean"
+    },
+    "availableCommitTypes": {
+      "default": [],
+      "description": "Built-in commit types to offer; all of them when empty. Custom types are always offered.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "feat",
+          "fix",
+          "refactor",
+          "perf",
+          "chore",
+          "clean",
+          "security",
+          "docs",
+          "test",
+          "build",
+          "remove",
+          "style",
+          "config",
+          "upgrade",
+          "downgrade",
+          "i18n",
+          "init",
+          "deploy",
+          "db",
+          "ux",
+          "revert",
+          "breaking",
+          "flag",
+          "a11y",
+          "seo",
+          "analytics",
+          "mock",
+          "api",
+          "prune",
+          "typo",
+          "review",
+          "experiment",
+          "pkg",
+          "animation",
+          "script",
+          "struct",
+          "ci",
+          "legal",
+          "monitor",
+          "support",
+          "task",
+          "arch"
+        ]
       }
     },
     "availablePromptQuestions": {
-      "description": "The types that will be shown in the list of type selections.",
-      "default": [],
+      "default": [
+        "type",
+        "component",
+        "title",
+        "description",
+        "breaking",
+        "issues"
+      ],
+      "description": "Questions to ask, at least `type` and `title`. They are always asked in the built-in order.",
       "type": "array",
       "items": {
+        "type": "string",
         "enum": [
-          "breaking",
-          "comment",
+          "type",
           "component",
-          "description",
-          "issues",
           "title",
-          "type"
-        ],
-        "type": "string"
+          "description",
+          "breaking",
+          "issues",
+          "comment"
+        ]
       }
     },
     "baseCommitTypes": {
-      "description": "Can change the basic types here.",
       "default": {},
+      "description": "Overrides for built-in commit types.",
       "type": "object",
-      "properties": {
-        "feat": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
+      "propertyNames": {
+        "type": "string",
+        "enum": [
+          "feat",
+          "fix",
+          "refactor",
+          "perf",
+          "chore",
+          "clean",
+          "security",
+          "docs",
+          "test",
+          "build",
+          "remove",
+          "style",
+          "config",
+          "upgrade",
+          "downgrade",
+          "i18n",
+          "init",
+          "deploy",
+          "db",
+          "ux",
+          "revert",
+          "breaking",
+          "flag",
+          "a11y",
+          "seo",
+          "analytics",
+          "mock",
+          "api",
+          "prune",
+          "typo",
+          "review",
+          "experiment",
+          "pkg",
+          "animation",
+          "script",
+          "struct",
+          "ci",
+          "legal",
+          "monitor",
+          "support",
+          "task",
+          "arch"
+        ]
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "emoji": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Emoji inserted into the commit message.",
+            "examples": [
+              "🚀"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Shortcode of the emoji.",
+            "examples": [
+              ":rocket:"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Description shown in the type selection.",
+            "examples": [
+              "Deploying application"
+            ]
           }
         },
-        "fix": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "refactor": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "perf": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "clean": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "security": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "docs": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "test": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "build": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "remove": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "style": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "config": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "upgrade": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "downgrade": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "i18n": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "init": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "deploy": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "db": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "ux": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "revert": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "breaking": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "flag": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "a11y": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "seo": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "analytics": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "mock": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "api": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "prune": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "typo": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "review": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "experiment": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "pkg": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "animation": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "script": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "struct": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "ci": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "legal": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "fix-ci": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "monitor": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "support": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "task": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        },
-        "arch": {
-          "type": "object",
-          "properties": {
-            "emoji": {
-              "description": "Emoji of the type commit.",
-              "default": "🚀",
-              "type": "string"
-            },
-            "code": {
-              "description": "Code of the emoji.",
-              "default": ":rocket:",
-              "type": "string"
-            },
-            "description": {
-              "description": "Description of the type commit.",
-              "default": "Deploying application",
-              "type": "string"
-            }
-          }
-        }
+        "additionalProperties": false
       }
     },
     "addCustomCommitTypes": {
-      "description": "Create custom commit types.",
       "default": {},
-      "type": "object"
+      "description": "Additional commit types, keyed by name.",
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "emoji": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Emoji inserted into the commit message.",
+            "examples": [
+              "🚀"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Shortcode of the emoji.",
+            "examples": [
+              ":rocket:"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Description shown in the type selection.",
+            "examples": [
+              "Deploying application"
+            ]
+          }
+        },
+        "required": [
+          "emoji",
+          "code",
+          "description"
+        ],
+        "additionalProperties": false
+      }
     },
     "baseQuestionsOptions": {
-      "description": "Change options of the basic questions.",
       "default": [],
+      "description": "Overrides for the built-in questions.",
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
           "key": {
-            "description": "Question key.",
-            "default": "type",
+            "type": "string",
             "enum": [
-              "breaking",
-              "comment",
+              "type",
               "component",
-              "description",
-              "issues",
               "title",
-              "type"
+              "description",
+              "breaking",
+              "issues",
+              "comment"
             ],
-            "type": "string"
+            "description": "Field the question fills."
           },
           "message": {
-            "description": "Question message.",
-            "default": "For example message",
-            "type": "string"
+            "description": "Question text. Overrides the translation.",
+            "type": "string",
+            "minLength": 1
           },
           "options": {
-            "description": "Question options.",
-            "default": {},
+            "description": "How the question behaves.",
             "type": "object",
             "properties": {
               "required": {
-                "description": "Required question.",
-                "default": "boolean",
+                "description": "The answer cannot be empty.",
                 "type": "boolean"
               },
               "skip": {
-                "description": "Skip question.",
-                "default": "boolean",
+                "description": "Do not ask this question.",
                 "type": "boolean"
               },
               "validations": {
-                "description": "Validation options.",
-                "default": {},
+                "description": "Answer validation.",
                 "type": "object",
                 "properties": {
                   "length": {
+                    "description": "Length limits of the answer.",
                     "type": "object",
                     "properties": {
                       "minMessageLength": {
-                        "description": "Minimum message length.",
-                        "default": 0,
-                        "type": "number"
+                        "description": "Minimum answer length.",
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
                       },
                       "maxMessageLength": {
-                        "description": "Maximum message length.",
-                        "default": 70,
-                        "type": "number"
+                        "description": "Maximum answer length.",
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
                       }
-                    }
+                    },
+                    "additionalProperties": false
                   }
-                }
+                },
+                "additionalProperties": false
               }
-            }
+            },
+            "additionalProperties": false
           }
         },
         "required": [
           "key"
-        ]
+        ],
+        "additionalProperties": false
       }
     },
     "validateCommitBadWords": {
-      "description": "Check commit message for bad words",
       "default": true,
+      "description": "Run the profanity filter.",
       "type": "boolean"
     },
     "badWordsOptions": {
-      "description": "Bad words validation options.",
+      "description": "What the profanity filter does with blocked words.",
       "default": {},
       "type": "object",
       "properties": {
         "checkHasProfaneWords": {
-          "description": "Check has profane words in the message.",
           "default": true,
-          "type": "boolean"
-        },
-        "clearMessage": {
-          "description": "Clear message from profane words.",
-          "default": true,
+          "description": "Reject answers that contain blocked words.",
           "type": "boolean"
         },
         "replaceProfaneWords": {
-          "description": "Replace profane words in the message on placeholder.",
-          "default": true,
+          "default": false,
+          "description": "Mask blocked words with the placeholder.",
+          "type": "boolean"
+        },
+        "clearMessage": {
+          "default": false,
+          "description": "Remove blocked words from the message.",
           "type": "boolean"
         },
         "options": {
-          "description": "Bad words validation options.",
+          "description": "The word list.",
           "default": {},
           "type": "object",
           "properties": {
             "additionalBlockWords": {
-              "description": "List of bad words to block.",
-              "default": [
-                "fuck"
-              ],
+              "default": [],
+              "description": "Extra words to block.",
               "type": "array",
               "items": {
-                "type": "string"
+                "type": "string",
+                "minLength": 1
               }
             },
             "excludedWords": {
-              "description": "A list of words that do not need to be blocked, even if they are in the blocklist.",
-              "default": [
-                "fool"
-              ],
+              "default": [],
+              "description": "Words that are never blocked.",
               "type": "array",
               "items": {
                 "type": "string"
               }
             },
             "placeholder": {
-              "description": "A character or string that replaces bad words.",
               "default": "*",
-              "type": "string"
+              "description": "Character a blocked word is masked with.",
+              "type": "string",
+              "minLength": 1
             },
             "overrideBlockWords": {
-              "description": "Redefine the list of bad words.",
               "default": false,
+              "description": "Block only `additionalBlockWords`, without the built-in list.",
               "type": "boolean"
             }
-          }
+          },
+          "additionalProperties": false
         }
-      }
+      },
+      "additionalProperties": false
     },
     "showBanner": {
-      "description": "Show the banner before starting the commit process.",
-      "default": true,
+      "default": false,
+      "description": "Show a figlet banner before the questions.",
       "type": "boolean"
     },
     "showBannerOptions": {
-      "description": "Show the banner before starting the commit process.",
+      "description": "What the banner shows when `showBanner` is on.",
       "default": {},
       "type": "object",
       "properties": {
         "bannerText": {
+          "default": "Commit Jazzer",
+          "description": "Text rendered with figlet.",
           "type": "string"
         },
         "figletOptions": {
+          "description": "Options passed to figlet.",
+          "default": {},
           "type": "object",
           "properties": {
             "font": {
+              "default": "Standard",
+              "description": "Figlet font name.",
+              "type": "string",
               "enum": [
                 "1Row",
                 "3-D",
@@ -1053,6 +513,11 @@
                 "3x5",
                 "4Max",
                 "5 Line Oblique",
+                "Acrobatic",
+                "Alligator",
+                "Alligator2",
+                "Alpha",
+                "Alphabet",
                 "AMC 3 Line",
                 "AMC 3 Liv1",
                 "AMC AAA01",
@@ -1064,17 +529,17 @@
                 "AMC Thin",
                 "AMC Tubes",
                 "AMC Untitled",
+                "ANSI Compact",
                 "ANSI Regular",
                 "ANSI Shadow",
-                "ASCII New Roman",
-                "Acrobatic",
-                "Alligator",
-                "Alligator2",
-                "Alpha",
-                "Alphabet",
                 "Arrows",
+                "ASCII 12",
+                "ASCII 9",
+                "ASCII New Roman",
                 "Avatar",
                 "B1FF",
+                "Babyface Lame",
+                "Babyface Leet",
                 "Banner",
                 "Banner3",
                 "Banner3-D",
@@ -1085,16 +550,21 @@
                 "Bell",
                 "Benjamin",
                 "Big",
+                "Big ASCII 12",
+                "Big ASCII 9",
                 "Big Chief",
                 "Big Money-ne",
                 "Big Money-nw",
                 "Big Money-se",
                 "Big Money-sw",
+                "Big Mono 12",
+                "Big Mono 9",
                 "Bigfig",
                 "Binary",
                 "Block",
                 "Blocks",
                 "Bloody",
+                "BlurVision ASCII",
                 "Bolger",
                 "Braced",
                 "Bright",
@@ -1109,6 +579,9 @@
                 "Catwalk",
                 "Chiseled",
                 "Chunky",
+                "Circle",
+                "Classy",
+                "Coder Mini",
                 "Coinstak",
                 "Cola",
                 "Colossal",
@@ -1116,6 +589,7 @@
                 "Contessa",
                 "Contrast",
                 "Cosmike",
+                "Cosmike2",
                 "Crawford",
                 "Crawford2",
                 "Crazy",
@@ -1126,21 +600,22 @@
                 "Cybersmall",
                 "Cygnet",
                 "DANC4",
-                "DOS Rebel",
-                "DWhistled",
                 "Dancing Font",
                 "Decimal",
                 "Def Leppard",
                 "Delta Corps Priest 1",
+                "DiamFont",
                 "Diamond",
                 "Diet Cola",
                 "Digital",
                 "Doh",
                 "Doom",
+                "DOS Rebel",
                 "Dot Matrix",
                 "Double",
                 "Double Shorts",
                 "Dr Pepper",
+                "DWhistled",
                 "Efti Chess",
                 "Efti Font",
                 "Efti Italic",
@@ -1150,6 +625,8 @@
                 "Efti Water",
                 "Electronic",
                 "Elite",
+                "Emboss",
+                "Emboss 2",
                 "Epic",
                 "Fender",
                 "Filter",
@@ -1157,10 +634,14 @@
                 "Fire Font-s",
                 "Flipped",
                 "Flower Power",
+                "Font Font",
                 "Four Tops",
                 "Fraktur",
                 "Fun Face",
                 "Fun Faces",
+                "Future",
+                "Future Smooth",
+                "Future Thin",
                 "Fuzzy",
                 "Georgi16",
                 "Georgia11",
@@ -1190,27 +671,32 @@
                 "Isometric4",
                 "Italic",
                 "Ivrit",
+                "Jacky",
+                "Jazmine",
+                "Jerusalem",
                 "JS Block Letters",
                 "JS Bracket Letters",
                 "JS Capital Curves",
                 "JS Cursive",
                 "JS Stick Letters",
-                "Jacky",
-                "Jazmine",
-                "Jerusalem",
                 "Katakana",
                 "Kban",
                 "Keyboard",
                 "Knob",
                 "Konto",
                 "Konto Slant",
-                "LCD",
                 "Larry 3D",
                 "Larry 3D 2",
+                "LCD",
                 "Lean",
+                "Letter",
                 "Letters",
                 "Lil Devil",
                 "Line Blocks",
+                "Linguaholic Mini Block",
+                "Linguaholic Neon",
+                "Linguaholic Rounded",
+                "Linguaholic Shadow 3D",
                 "Linux",
                 "Lockergnome",
                 "Madrid",
@@ -1220,30 +706,33 @@
                 "Merlin2",
                 "Mike",
                 "Mini",
+                "miniwi",
                 "Mirror",
                 "Mnemonic",
                 "Modular",
+                "Mono 12",
+                "Mono 9",
                 "Morse",
                 "Morse2",
                 "Moscow",
                 "Mshebrew210",
                 "Muzzle",
-                "NScript",
-                "NT Greek",
-                "NV Script",
                 "Nancyj",
                 "Nancyj-Fancy",
                 "Nancyj-Improved",
                 "Nancyj-Underlined",
                 "Nipples",
+                "NScript",
+                "NT Greek",
+                "NV Script",
                 "O8",
-                "OS2",
                 "Octal",
                 "Ogre",
                 "Old Banner",
+                "OS2",
                 "Pagga",
-                "Patorjk's Cheese",
                 "Patorjk-HeX",
+                "Patorjk's Cheese",
                 "Pawp",
                 "Peaks",
                 "Peaks Slant",
@@ -1254,6 +743,7 @@
                 "Puzzle",
                 "Pyramid",
                 "Rammstein",
+                "Rebel",
                 "Rectangles",
                 "Red Phoenix",
                 "Relief",
@@ -1265,23 +755,31 @@
                 "Rounded",
                 "Rowan Cap",
                 "Rozzo",
+                "RubiFont",
                 "Runic",
                 "Runyc",
                 "S Blood",
-                "SL Script",
                 "Santa Clara",
                 "Script",
                 "Serifcap",
+                "Shaded Blocky",
                 "Shadow",
                 "Shimrod",
                 "Short",
+                "SL Script",
                 "Slant",
                 "Slant Relief",
                 "Slide",
                 "Small",
+                "Small ASCII 12",
+                "Small ASCII 9",
+                "Small Block",
+                "Small Braille",
                 "Small Caps",
                 "Small Isometric1",
                 "Small Keyboard",
+                "Small Mono 12",
+                "Small Mono 9",
                 "Small Poison",
                 "Small Script",
                 "Small Shadow",
@@ -1306,20 +804,22 @@
                 "Swamp Land",
                 "Swan",
                 "Sweet",
-                "THIS",
                 "Tanja",
                 "Tengwar",
                 "Term",
+                "Terrace",
                 "Test1",
                 "The Edge",
                 "Thick",
                 "Thin",
+                "THIS",
                 "Thorned",
                 "Three Point",
                 "Ticks",
                 "Ticks Slant",
                 "Tiles",
                 "Tinker-Toy",
+                "Tmplr",
                 "Tombstone",
                 "Train",
                 "Trek",
@@ -1327,146 +827,172 @@
                 "Tubular",
                 "Twisted",
                 "Two Point",
-                "USA Flag",
                 "Univers",
+                "Upside Down Text",
+                "USA Flag",
                 "Varsity",
+                "Wavescape",
                 "Wavy",
                 "Weird",
                 "Wet Letter",
                 "Whimsy",
+                "WideTerm",
                 "Wow"
-              ],
-              "type": "string"
+              ]
             },
             "horizontalLayout": {
+              "default": "default",
+              "description": "Horizontal letter spacing.",
+              "type": "string",
               "enum": [
-                "controlled smushing",
                 "default",
-                "fitted",
                 "full",
+                "fitted",
+                "controlled smushing",
                 "universal smushing"
-              ],
-              "type": "string"
+              ]
             },
             "verticalLayout": {
+              "default": "default",
+              "description": "Vertical line spacing.",
+              "type": "string",
               "enum": [
-                "controlled smushing",
                 "default",
-                "fitted",
                 "full",
+                "fitted",
+                "controlled smushing",
                 "universal smushing"
-              ],
-              "type": "string"
-            },
-            "printDirection": {
-              "type": "number"
-            },
-            "showHardBlanks": {
-              "type": "boolean"
+              ]
             },
             "width": {
-              "description": "This option allows you to limit the width of the output.\nFor example, if you want your output to be a max of 80 characters wide, you would set this option to 80.",
-              "default": "undefined",
-              "type": "number"
+              "description": "Maximum width before figlet wraps the text.",
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
             },
             "whitespaceBreak": {
-              "description": "This option works in conjunction with \"width\".\nIf this option is set to true, then the library will attempt to break text up on whitespace when limiting the width.",
-              "default": false,
+              "default": true,
+              "description": "Wrap only at spaces.",
               "type": "boolean"
             }
-          }
+          },
+          "additionalProperties": false
         },
         "options": {
+          "description": "Colors, separators and footer of the banner.",
+          "default": {},
           "type": "object",
           "properties": {
             "color": {
-              "description": "Basic colors.\n\n[More colors here.](https://github.com/chalk/chalk/blob/master/readme.md#256-and-truecolor-color-support)",
+              "default": "blue",
+              "description": "Style of the banner text.",
+              "type": "string",
               "enum": [
-                "bgBlack",
-                "bgBlackBright",
-                "bgBlue",
-                "bgBlueBright",
-                "bgCyan",
-                "bgCyanBright",
-                "bgGray",
-                "bgGreen",
-                "bgGreenBright",
-                "bgGrey",
-                "bgMagenta",
-                "bgMagentaBright",
-                "bgRed",
-                "bgRedBright",
-                "bgWhite",
-                "bgWhiteBright",
-                "bgYellow",
-                "bgYellowBright",
+                "reset",
+                "bold",
+                "dim",
+                "italic",
+                "underline",
+                "blink",
+                "inverse",
+                "hidden",
+                "strikethrough",
+                "doubleunderline",
                 "black",
-                "blackBright",
-                "blue",
-                "blueBright",
-                "cyan",
-                "cyanBright",
-                "gray",
-                "green",
-                "greenBright",
-                "grey",
-                "magenta",
-                "magentaBright",
                 "red",
-                "redBright",
-                "white",
-                "whiteBright",
+                "green",
                 "yellow",
-                "yellowBright"
-              ],
-              "type": "string"
+                "blue",
+                "magenta",
+                "cyan",
+                "white",
+                "bgBlack",
+                "bgRed",
+                "bgGreen",
+                "bgYellow",
+                "bgBlue",
+                "bgMagenta",
+                "bgCyan",
+                "bgWhite",
+                "framed",
+                "overlined",
+                "gray",
+                "redBright",
+                "greenBright",
+                "yellowBright",
+                "blueBright",
+                "magentaBright",
+                "cyanBright",
+                "whiteBright",
+                "bgGray",
+                "bgRedBright",
+                "bgGreenBright",
+                "bgYellowBright",
+                "bgBlueBright",
+                "bgMagentaBright",
+                "bgCyanBright",
+                "bgWhiteBright"
+              ]
             },
             "separator": {
+              "default": "⭐",
+              "description": "Characters of the line under the banner.",
               "type": "string"
             },
             "separatorColor": {
-              "description": "Basic colors.\n\n[More colors here.](https://github.com/chalk/chalk/blob/master/readme.md#256-and-truecolor-color-support)",
+              "default": "gray",
+              "description": "Style of both separator lines.",
+              "type": "string",
               "enum": [
-                "bgBlack",
-                "bgBlackBright",
-                "bgBlue",
-                "bgBlueBright",
-                "bgCyan",
-                "bgCyanBright",
-                "bgGray",
-                "bgGreen",
-                "bgGreenBright",
-                "bgGrey",
-                "bgMagenta",
-                "bgMagentaBright",
-                "bgRed",
-                "bgRedBright",
-                "bgWhite",
-                "bgWhiteBright",
-                "bgYellow",
-                "bgYellowBright",
+                "reset",
+                "bold",
+                "dim",
+                "italic",
+                "underline",
+                "blink",
+                "inverse",
+                "hidden",
+                "strikethrough",
+                "doubleunderline",
                 "black",
-                "blackBright",
-                "blue",
-                "blueBright",
-                "cyan",
-                "cyanBright",
-                "gray",
-                "green",
-                "greenBright",
-                "grey",
-                "magenta",
-                "magentaBright",
                 "red",
-                "redBright",
-                "white",
-                "whiteBright",
+                "green",
                 "yellow",
-                "yellowBright"
-              ],
-              "type": "string"
+                "blue",
+                "magenta",
+                "cyan",
+                "white",
+                "bgBlack",
+                "bgRed",
+                "bgGreen",
+                "bgYellow",
+                "bgBlue",
+                "bgMagenta",
+                "bgCyan",
+                "bgWhite",
+                "framed",
+                "overlined",
+                "gray",
+                "redBright",
+                "greenBright",
+                "yellowBright",
+                "blueBright",
+                "magentaBright",
+                "cyanBright",
+                "whiteBright",
+                "bgGray",
+                "bgRedBright",
+                "bgGreenBright",
+                "bgYellowBright",
+                "bgBlueBright",
+                "bgMagentaBright",
+                "bgCyanBright",
+                "bgWhiteBright"
+              ]
             },
             "footerMessages": {
+              "default": [],
+              "description": "Lines printed between the separators.",
               "type": "array",
               "items": {
                 "type": "object",
@@ -1475,66 +1001,82 @@
                     "type": "string"
                   },
                   "color": {
-                    "description": "Basic colors.\n\n[More colors here.](https://github.com/chalk/chalk/blob/master/readme.md#256-and-truecolor-color-support)",
+                    "type": "string",
                     "enum": [
-                      "bgBlack",
-                      "bgBlackBright",
-                      "bgBlue",
-                      "bgBlueBright",
-                      "bgCyan",
-                      "bgCyanBright",
-                      "bgGray",
-                      "bgGreen",
-                      "bgGreenBright",
-                      "bgGrey",
-                      "bgMagenta",
-                      "bgMagentaBright",
-                      "bgRed",
-                      "bgRedBright",
-                      "bgWhite",
-                      "bgWhiteBright",
-                      "bgYellow",
-                      "bgYellowBright",
+                      "reset",
+                      "bold",
+                      "dim",
+                      "italic",
+                      "underline",
+                      "blink",
+                      "inverse",
+                      "hidden",
+                      "strikethrough",
+                      "doubleunderline",
                       "black",
-                      "blackBright",
-                      "blue",
-                      "blueBright",
-                      "cyan",
-                      "cyanBright",
-                      "gray",
-                      "green",
-                      "greenBright",
-                      "grey",
-                      "magenta",
-                      "magentaBright",
                       "red",
-                      "redBright",
-                      "white",
-                      "whiteBright",
+                      "green",
                       "yellow",
-                      "yellowBright"
+                      "blue",
+                      "magenta",
+                      "cyan",
+                      "white",
+                      "bgBlack",
+                      "bgRed",
+                      "bgGreen",
+                      "bgYellow",
+                      "bgBlue",
+                      "bgMagenta",
+                      "bgCyan",
+                      "bgWhite",
+                      "framed",
+                      "overlined",
+                      "gray",
+                      "redBright",
+                      "greenBright",
+                      "yellowBright",
+                      "blueBright",
+                      "magentaBright",
+                      "cyanBright",
+                      "whiteBright",
+                      "bgGray",
+                      "bgRedBright",
+                      "bgGreenBright",
+                      "bgYellowBright",
+                      "bgBlueBright",
+                      "bgMagentaBright",
+                      "bgCyanBright",
+                      "bgWhiteBright"
                     ],
-                    "type": "string"
+                    "description": "A `util.styleText` style, e.g. `blue` or `bgGray`."
                   }
                 },
                 "required": [
                   "text"
-                ]
+                ],
+                "additionalProperties": false
               }
             },
             "footerSeparator": {
+              "default": "⭐",
+              "description": "Characters of the line after the footer.",
               "type": "string"
             },
             "bottomSpacing": {
-              "type": "number"
+              "default": 1,
+              "description": "Empty lines after the banner.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
             }
-          }
+          },
+          "additionalProperties": false
         }
       },
-      "required": [
-        "bannerText"
-      ]
+      "additionalProperties": false
     }
   },
-  "$schema": "http://json-schema.org/draft-07/schema#"
+  "additionalProperties": false,
+  "title": "commit-jazzer configuration",
+  "description": "Configuration of the commit-jazzer CLI and Commitizen adapter."
 }

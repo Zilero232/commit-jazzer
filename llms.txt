@@ -1,0 +1,24 @@
+# commit-jazzer
+
+> Conventional Commits with emoji
+
+Pick a type, type a title, get a commit message that commitlint and semantic-release understand.
+
+## Table of Contents
+
+### Guide
+
+- [Getting started](/commit-jazzer/guide/getting-started.md)
+- [Message format](/commit-jazzer/guide/message-format.md)
+- [Configuration](/commit-jazzer/guide/configuration.md)
+- [Recipes](/commit-jazzer/guide/recipes.md)
+- [Migrating from 1.x](/commit-jazzer/guide/migration.md)
+- [FAQ](/commit-jazzer/guide/faq.md)
+
+### Reference
+
+- [Config options](/commit-jazzer/reference/config.md)
+- [CLI](/commit-jazzer/reference/cli.md)
+- [Commit types](/commit-jazzer/reference/commit-types.md)
+- [JavaScript API](/commit-jazzer/reference/api.md)
+

@@ -1,0 +1,788 @@
+---
+url: /commit-jazzer/guide/getting-started.md
+---
+# Getting started
+
+commit-jazzer asks a few questions (type, scope, title, …) and writes a [Conventional Commits](https://www.conventionalcommits.org) message with an emoji. It needs Node.js 22.13 or newer and git.
+
+## Install
+
+::: code-group
+
+```sh [npm]
+npm install --save-dev commit-jazzer
+```
+
+```sh [pnpm]
+pnpm add --save-dev commit-jazzer
+```
+
+```sh [yarn]
+yarn add --dev commit-jazzer
+```
+
+```sh [bun]
+bun add --dev commit-jazzer
+```
+
+:::
+
+The package installs the command under two names, `jazzer` and `commit-jazzer`. Without installing, use the package name: `npx commit-jazzer`. (`npx jazzer` would download an unrelated package called `jazzer`.)
+
+## Commit
+
+Stage your changes and run:
+
+```sh
+npx jazzer
+```
+
+It asks the questions, shows the message, and runs `git commit` once you confirm. Options for `git commit` go after `--`:
+
+```sh
+npx jazzer -- --no-verify -S
+```
+
+A script makes it shorter for the team:
+
+```json
+{
+  "scripts": {
+    "commit": "jazzer"
+  }
+}
+```
+
+## Or let `git commit` ask
+
+With the hook installed, a plain `git commit` asks the questions and opens the editor with the message filled in. `git commit -m "…"`, merges and amends are left alone, and so are commits from IDEs and GUI clients, which have no terminal to ask in.
+
+```sh
+npx jazzer init --hook          # install
+npx jazzer init --remove-hook   # remove
+```
+
+`init --hook` also writes a config to the repository root when there is none. `git commit -m` still skips the questions; `npx jazzer init --lint` adds a `commit-msg` hook that checks those messages with `jazzer lint`.
+
+The hook goes to `.husky/prepare-commit-msg` when the project uses [husky](https://typicode.github.io/husky/), and to git's hooks directory otherwise (`core.hooksPath` is respected). See [Recipes](./recipes#git-hooks) for lefthook and simple-git-hooks.
+
+## Or keep using `git cz`
+
+If the team already runs [Commitizen](https://github.com/commitizen/cz-cli), point it at commit-jazzer:
+
+```json
+{
+  "config": {
+    "commitizen": {
+      "path": "commit-jazzer"
+    }
+  }
+}
+```
+
+For a global setup, install both packages globally and put the path into `~/.czrc`:
+
+```sh
+npm install --global commitizen commit-jazzer
+echo '{ "path": "commit-jazzer" }' > ~/.czrc
+```
+
+## Configure
+
+Everything works without a config. To change the questions, the types or the format, create one:
+
+```sh
+npx jazzer init        # jazzer.config.json
+npx jazzer init --ts   # jazzer.config.ts
+```
+
+Continue with [Configuration](./configuration), or open the [Playground](/playground) to see how the options change the message.
+
+## Uninstall
+
+```sh
+npx jazzer init --remove-hook   # if you installed the hook
+npm uninstall commit-jazzer
+```
+
+Then delete `jazzer.config.*` and the `config.commitizen` entry of `package.json`, if you added them.
+
+---
+
+---
+url: /commit-jazzer/guide/message-format.md
+---
+# Message format
+
+## The default
+
+```text
+<type>(<scope>)!: <emoji> <title>
+
+<description>
+
+<comment>
+
+BREAKING CHANGE: <breaking>
+Closes <issue>
+Closes <issue>
+```
+
+Empty parts disappear, together with the blank lines around them. With only a type and a title the message is a single line:
+
+```text
+fix: 🐛 handle an empty config file
+```
+
+| Part               | Question    | Notes                                                                                                                                                                                    |
+| ------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`             | type        | Chosen from the list; brings its emoji.                                                                                                                                                  |
+| `(scope)`          | component   | Wrapped in parentheses only when given.                                                                                                                                                  |
+| `!`                | breaking    | Added when the breaking change answer is not empty.                                                                                                                                      |
+| `title`            | title       | First letter lower-cased (unless it is an acronym such as `API`), trailing period removed. Turn off with `lowercaseTitle: false`.                                                        |
+| `description`      | description | The body. `\|` starts a new line (`breaklineChar`); one space around it is dropped, more is kept as indentation. Wrapped at 100 columns (`bodyLineLength`).                              |
+| `comment`          | comment     | Another body paragraph. Not asked by default.                                                                                                                                            |
+| `BREAKING CHANGE:` | breaking    | The footer semantic-release looks for.                                                                                                                                                   |
+| `Closes #12`       | issues      | One line per issue, so GitHub closes each of them. `12 13` becomes `#12` and `#13`; keys like `JIRA-7` stay; a typed `closes` or `fixes:` is dropped. The word comes from `issuePrefix`. |
+
+## Why the emoji goes after the colon
+
+Tools parse the header with a pattern like `type(scope)!: subject`. With the emoji after the colon it becomes part of the subject, so:
+
+* commitlint with `@commitlint/config-conventional` accepts the message;
+* semantic-release and conventional-changelog read the type, the scope and the breaking change correctly.
+
+An emoji in front of the type (`✨ feat: …`) breaks both. The test suite lints and parses generated messages for every combination of fields to keep this true.
+
+commitlint's `subject-case` rule cannot judge a subject that starts with an emoji. commit-jazzer lower-cases the title itself instead.
+
+## Header length
+
+commitlint rejects headers over 100 characters by default. While you type the title, the counter shows how much of `headerMaxLength` is left after the type, scope and emoji. When the breaking change question is still ahead, one character is kept for the `!`.
+
+The answers have limits of their own: the title 70 characters, the scope 30, the issues 100. Change them with `baseQuestionsOptions[].options.validations.length`. The scope, the title and the breaking change must fit on one line, and the scope cannot contain parentheses.
+
+## Changing the template
+
+`template` is a [Handlebars](https://handlebarsjs.com/guide/) template. Values are inserted as typed: `&`, `<` and quotes are not escaped.
+
+| Variable                                                                     | Value                                                                |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `type`, `component`, `title`, `description`, `comment`, `breaking`, `issues` | The answers.                                                         |
+| `emoji`, `code`                                                              | The emoji of the type and its shortcode, e.g. `✨` and `:sparkles:`. |
+| `scope`                                                                      | `(component)`, or empty.                                             |
+| `bang`                                                                       | `!` for a breaking change, or empty.                                 |
+| `issuePrefix`                                                                | The `issuePrefix` option.                                            |
+| `issueFooter`                                                                | One `<issuePrefix> <issue>` line per issue.                          |
+
+Shortcodes instead of unicode emoji: the default template with `{{code}}` in place of `{{emoji}}`.
+
+```json
+{
+  "template": "{{type}}{{scope}}{{bang}}: {{code}} {{title}}\n\n{{description}}\n\n{{comment}}\n\n{{#if breaking}}BREAKING CHANGE: {{breaking}}{{/if}}\n{{issueFooter}}"
+}
+```
+
+Questions whose answer the template never writes are not asked: with the 1.x format below only the type and the title are. The 1.x format:
+
+```json
+{
+  "template": "{{type}}: {{emoji}} - {{title}}"
+}
+```
+
+The only rule for valid Conventional Commits: keep `{{type}}{{scope}}{{bang}}: ` at the start of the first line.
+
+Body lines are wrapped at `bodyLineLength`; footer lines (`BREAKING CHANGE: …`, `Closes #12`, `Co-authored-by: …`) are never wrapped, and a wrapped line never starts with `#`. In hook mode git removes lines that start with `#` after you close the editor, so don't start a body line with an issue number.
+
+---
+
+---
+url: /commit-jazzer/guide/configuration.md
+---
+# Configuration
+
+Without a config commit-jazzer uses the defaults. A config only needs the options you want to change.
+
+## Where it is read from
+
+1. `--config <path>`, or the file in `$JAZZER_CONFIG`; a relative path is relative to the current directory.
+2. A project config. The search starts in the current directory and goes up to the root of the git repository; the first match wins:
+   * the `jazzer` field of `package.json`
+   * `.jazzerrc` or `.jazzerrc.json` (JSON)
+   * `.jazzer.config.{json,ts,mts,cts,js,mjs,cjs}`
+   * `jazzer.config.{json,ts,mts,cts,js,mjs,cjs}`
+3. Your own config, for every repository without one: `~/.config/commit-jazzer/config.{json,ts,…}` (or `$XDG_CONFIG_HOME/commit-jazzer/`), then `~/.jazzerrc` or `~/.jazzerrc.json`.
+
+Command-line flags override the config for one run. A project config wins over the commitlint rules, which win over your own config; the defaults fill the rest.
+
+TypeScript configs need nothing extra: they are loaded with [jiti](https://github.com/unjs/jiti), and `import { defineConfig } from 'commit-jazzer'` works even when the package is installed globally.
+
+::: warning A config file is code
+A `.ts` or `.js` config runs when commit-jazzer starts, like an ESLint or Prettier config. In a repository you do not trust, look at its `jazzer.config.*` before committing there, or point `--config` at a JSON file of your own. The search never leaves the repository, so files in parent directories such as `/tmp` are not loaded.
+:::
+
+## JSON
+
+```json
+{
+  "$schema": "./node_modules/commit-jazzer/schema.json",
+  "scopes": ["api", "web", "docs"]
+}
+```
+
+The `$schema` line gives autocompletion and inline errors in VS Code, WebStorm and other editors. Use `https://zilero232.github.io/commit-jazzer/commit-jazzer-schema.json` when the package is not installed locally.
+
+## TypeScript
+
+```ts
+import { defineConfig } from 'commit-jazzer';
+
+export default defineConfig({
+  scopes: ['api', 'web', 'docs'],
+  addCustomCommitTypes: {
+    release: { emoji: '🔖', code: ':bookmark:', description: 'Releasing a version' }
+  }
+});
+```
+
+## Validation
+
+The config is checked before the first question. Unknown keys are errors too, so a typo does not pass silently:
+
+```text
+[commit-jazzer] Invalid jazzer.config.json:
+✖ Unrecognized key: "languge"
+```
+
+## Taken from commitlint
+
+When the project has a [commitlint](https://commitlint.js.org) config and `@commitlint/load` or `@commitlint/cli` installed, these rules fill the options your config does not set:
+
+| commitlint rule        | Option                                                                  |
+| ---------------------- | ----------------------------------------------------------------------- |
+| `type-enum`            | `availableCommitTypes`: the built-in types it lists                     |
+| `scope-enum`           | `scopes`; as an error (level 2) it also sets `allowCustomScopes: false` |
+| `header-max-length`    | `headerMaxLength`                                                       |
+| `body-max-line-length` | `bodyLineLength`                                                        |
+
+Turn it off with `"useCommitlint": false`.
+
+## Suggested from the branch
+
+On a branch such as `feat/PROJ-12-login` or `fix/42-crash`, the type and the issue are preselected; press Enter to accept or change them. The prefix can be a type name or a common variant (`feature`, `bugfix`, `hotfix`, `doc`, `tests`, …); an issue key counts when it is written in capitals. Only in a terminal: scripts and CI get exactly what their flags say. Turn it off with `"inferFromBranch": false`.
+
+## Common changes
+
+### Fewer questions
+
+```json
+{ "availablePromptQuestions": ["type", "title"] }
+```
+
+The questions are always asked in this order: `type`, `component`, `title`, `description`, `breaking`, `issues`, `comment`.
+
+### A list of scopes
+
+```json
+{ "scopes": ["api", "web", "docs"], "allowCustomScopes": false }
+```
+
+The scope question becomes a search over the list. With `allowCustomScopes: false` only listed scopes are accepted, from the prompt and from `--scope`.
+
+### Fewer types, changed types, new types
+
+```json
+{
+  "availableCommitTypes": ["feat", "fix", "docs", "refactor", "test", "chore"],
+  "baseCommitTypes": {
+    "feat": { "emoji": "🎸" }
+  },
+  "addCustomCommitTypes": {
+    "release": { "emoji": "🔖", "code": ":bookmark:", "description": "Releasing a version" }
+  }
+}
+```
+
+Custom types are always offered, after the built-in ones. Their names use letters, digits and `_`: Conventional Commits parsers read no `-` in a type. The full list is in [Commit types](/reference/commit-types).
+
+### Frequent commits
+
+```json
+{
+  "aliases": {
+    "deps": { "type": "upgrade", "component": "deps", "title": "update dependencies" }
+  }
+}
+```
+
+`jazzer :deps` commits it without questions. Flags still apply: `jazzer :deps -i 31`. Alias types and scopes are checked when the config is loaded.
+
+### Question text and limits
+
+```json
+{
+  "baseQuestionsOptions": [
+    {
+      "key": "title",
+      "message": "What does this commit do?",
+      "options": { "validations": { "length": { "minMessageLength": 10, "maxMessageLength": 60 } } }
+    },
+    { "key": "issues", "options": { "required": true } }
+  ]
+}
+```
+
+### Language
+
+```json
+{ "language": "de" }
+```
+
+Supported: `en`, `ru`, `es`, `de`, `fr`, `it`, `pt`, `pl`, `tr`, `uk`, `zh`, `ja`, `ko`.
+
+### Profanity filter
+
+On by default: an answer with a blocked word is rejected while you type. To mask words instead:
+
+```json
+{
+  "badWordsOptions": {
+    "checkHasProfaneWords": false,
+    "replaceProfaneWords": true,
+    "options": { "additionalBlockWords": ["foo"], "excludedWords": ["hell"], "placeholder": "#" }
+  }
+}
+```
+
+Turn it off with `"validateCommitBadWords": false`.
+
+### Banner and confirmation
+
+```json
+{ "showBanner": true, "confirmCommit": false }
+```
+
+The banner is off by default and never shown without a terminal. `--banner`, `--no-banner` and `--yes` change these for one run.
+
+Every option with its type and default is listed in [Config options](/reference/config).
+
+---
+
+---
+url: /commit-jazzer/guide/recipes.md
+---
+# Recipes
+
+## Git hooks
+
+`jazzer init --hook` writes the hook for you. It runs the project's copy, then a global one, and lets the commit go on when neither is installed.
+
+git gives hooks no terminal on stdin, so the prompts open `/dev/tty`. Where there is none (IDE git panels, GUI clients, Windows) the hook does nothing and git opens its editor as usual.
+
+With another hook manager, run the project's copy the same way:
+
+::: code-group
+
+```sh [husky]
+# .husky/prepare-commit-msg
+[ -x node_modules/.bin/commit-jazzer ] && exec node_modules/.bin/commit-jazzer hook "$1" "$2"
+exit 0
+```
+
+```yaml [lefthook]
+# lefthook.yml
+prepare-commit-msg:
+  commands:
+    jazzer:
+      run: node_modules/.bin/commit-jazzer hook {1} {2}
+      interactive: true
+```
+
+```json [simple-git-hooks]
+{
+  "simple-git-hooks": {
+    "prepare-commit-msg": "node_modules/.bin/commit-jazzer hook \"$1\" \"$2\""
+  }
+}
+```
+
+:::
+
+## Check messages written without the questions
+
+`git commit -m` skips the questions, so its message can be anything. `jazzer init --lint` adds a `commit-msg` hook that runs `jazzer lint` on every message: the header format, the type, a closed scope list, a non-empty subject and the length limits from your config. Merges, reverts and `fixup!` commits pass as they are. `init --lint` refuses when your template does not start with `{{type}}`, as those messages would never pass.
+
+```text
+$ git commit -m "added stuff"
+[commit-jazzer] The first line must look like "type(scope): subject", got "added stuff"
+```
+
+## Check commits with commitlint
+
+commit-jazzer writes messages that pass `@commitlint/config-conventional`, and reads `scope-enum` and the length limits from your commitlint config (see [Configuration](./configuration#taken-from-commitlint)). Its built-in types go beyond the conventional list, so allow them:
+
+```js
+// commitlint.config.mjs (.mjs: `require('commit-jazzer')` only gives the Commitizen adapter)
+import { BUILT_IN_COMMIT_TYPE_NAMES } from 'commit-jazzer';
+
+export default {
+  extends: ['@commitlint/config-conventional'],
+  rules: {
+    'type-enum': [2, 'always', BUILT_IN_COMMIT_TYPE_NAMES],
+    // The subject starts with an emoji; commit-jazzer lower-cases the title itself.
+    'subject-case': [0]
+  }
+};
+```
+
+## Releases with semantic-release
+
+Use the `conventionalcommits` preset. `!` and `BREAKING CHANGE:` give a major release, `feat` a minor and `fix` a patch. Other types release nothing unless you add rules. Put `{ breaking: true, release: 'major' }` first: custom rules replace the defaults, so without it `refactor!:` would only be a patch.
+
+```js
+// release.config.js
+export default {
+  plugins: [
+    [
+      '@semantic-release/commit-analyzer',
+      {
+        preset: 'conventionalcommits',
+        releaseRules: [
+          { breaking: true, release: 'major' },
+          { type: 'refactor', release: 'patch' },
+          { type: 'security', release: 'patch' },
+          { type: 'upgrade', release: 'patch' }
+        ]
+      }
+    ],
+    ['@semantic-release/release-notes-generator', { preset: 'conventionalcommits' }],
+    '@semantic-release/npm',
+    '@semantic-release/github'
+  ]
+};
+```
+
+## Monorepo scopes
+
+Put the config in the repository root; it is found from every package directory. List the packages as scopes, resolved from the config file rather than the current directory:
+
+```ts
+// jazzer.config.ts
+import { readdirSync } from 'node:fs';
+import { defineConfig } from 'commit-jazzer';
+
+export default defineConfig({
+  scopes: readdirSync(new URL('./packages', import.meta.url), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name),
+  allowCustomScopes: false
+});
+```
+
+## Scripts, CI and coding agents
+
+Without a terminal nothing is asked. Give the required answers (type and title by default) as flags; optional questions without a flag stay empty:
+
+```sh
+jazzer -t fix -s parser -m "handle empty input" -b "Empty files no longer crash the parser." -i 31
+```
+
+A missing required answer is an error that names the flag (`Missing answer for --title`). Nothing is guessed from the branch name either. In a terminal, `--yes` skips the confirmation and asks only the required questions without a flag. `--dry-run` prints the message instead of committing; `--retry` commits the last message again after a failed hook.
+
+## Issue keys in the footer
+
+commit-jazzer writes issue keys in the footer. Make the question mandatory and change the word:
+
+```json
+{ "issuePrefix": "Refs", "baseQuestionsOptions": [{ "key": "issues", "options": { "required": true } }] }
+```
+
+```text
+feat(api): ✨ add rate limits
+
+Refs JIRA-118
+```
+
+On a branch like `feat/JIRA-118-rate-limits` the key is suggested automatically.
+
+---
+
+---
+url: /commit-jazzer/guide/migration.md
+---
+# Migrating from 1.x
+
+2.0 is a rewrite. These are the changes to check.
+
+## Requirements
+
+* **Node.js 22.13 or newer.** 1.x claimed Node 14 support.
+* The package is ESM. `require('commit-jazzer')` still works for Commitizen: it returns `{ prompter }`.
+
+## Message format
+
+The default template changed from
+
+```text
+{{type}}: {{emoji}} - {{title}}
+```
+
+to a full Conventional Commits message:
+
+```text
+{{type}}{{scope}}{{bang}}: {{emoji}} {{title}}
+
+{{description}}
+…
+```
+
+To keep the old format, set `"template": "{{type}}: {{emoji}} - {{title}}"`; then only the type and the title are asked, as the template writes nothing else.
+
+Other changes in the output:
+
+* The title is lower-cased and loses a trailing period. Set `lowercaseTitle: false` to keep it as typed.
+* Values are no longer HTML-escaped: `a & b` stays `a & b` (1.x wrote `a &amp; b`).
+* Each related issue gets its own footer line (`Closes #1`, `Closes #2`), so GitHub closes all of them.
+
+## Questions
+
+* The default questions are now `type`, `component`, `title`, `description`, `breaking` and `issues` (1.x: `type`, `title`). Set `availablePromptQuestions` to change them.
+* `language` now selects the prompt language; 1.x always asked in Russian.
+* An answer with a blocked word is rejected while you type, instead of the commit being aborted after the last question.
+* A confirmation step shows the message before committing. Turn it off with `confirmCommit: false` or `--yes`.
+
+## Banner
+
+The banner is off by default, and its default footer (the "give us a star" lines) is gone. Set `"showBanner": true` to get it back; `showBannerOptions.options.footerMessages` adds footer lines.
+
+## Config
+
+* Unknown keys are errors. Fix the reported key or remove it.
+* The search for a project config stops at the repository root instead of your home directory. A config in `~` now goes to `~/.config/commit-jazzer/config.json`, `~/.jazzerrc` or `~/.jazzerrc.json`.
+* `showBannerOptions` colors are [`util.styleText`](https://nodejs.org/api/util.html#utilstyletextformat-text-options) styles. They have the same names as the chalk colors 1.x used (`blue`, `bgGray`, …); figlet fonts must exist (`Standard`, `Slant`, …).
+* New config locations: `package.json` (`jazzer` field), `.jazzerrc`, and `.mts`/`.cts`/`.mjs`/`.cjs` configs.
+
+## Types
+
+* `CommitJazzerPrompterOptions` is now `JazzerConfig` (the old name is still exported, deprecated). Import types from `commit-jazzer`, not from `commit-jazzer/build/types`.
+* Use `defineConfig` instead of annotating the object.
+
+## Commit types
+
+Added `chore`. Removed `fix-ci`: Conventional Commits parsers (and semantic-release) cannot read a `-` in a type; write `fix(ci)` instead, and rename custom types with a `-`. New emoji for types whose emoji or shortcode were wrong or duplicated: `review` 👌, `monitor` 🔊, `animation` 💫, `mock` 🤡, `experiment` ⚗️, `legal` 📄. Override them with `baseCommitTypes` if you prefer the old ones.
+
+---
+
+---
+url: /commit-jazzer/guide/faq.md
+---
+# FAQ
+
+## The hook does not ask anything
+
+* The hook skips commits that already have a message: `git commit -m`, `-F`, merges, squashes and `--amend`.
+* It also skips commits without a terminal: IDE git panels, GUI clients, and Windows, where Node cannot open the terminal of a hook. git then opens its editor as usual.
+* A hook in `.git/hooks` must be executable: `chmod +x .git/hooks/prepare-commit-msg`.
+* `core.hooksPath` set by another tool? `jazzer init --hook` writes the hook there; with husky it goes to `.husky/`.
+* With `commit.template` set, git reports every commit as a template commit, and the hook leaves those alone.
+
+## `npx jazzer` runs something else
+
+`jazzer` is the command name, not the package name. Before installing, run `npx commit-jazzer`; after `npm install --save-dev commit-jazzer`, `npx jazzer` works too.
+
+## Commitizen uses an old Inquirer. Does that matter?
+
+No. Commitizen passes its Inquirer 8 to the adapter; commit-jazzer ignores it and uses the current `@inquirer` prompts.
+
+## How do I commit with a message I already have?
+
+`git commit -m "…"` as usual. With the hook installed it is left alone.
+
+## A hook rejected my commit. Do I have to answer everything again?
+
+No: `jazzer --retry` commits the last message again. The message of a `jazzer` commit that failed stays in `.git/commit-jazzer/last-message` until a commit goes through. Messages of the hook and of `git cz` are not stored there, but git keeps them in `.git/COMMIT_EDITMSG`.
+
+## Can I use it without a terminal?
+
+Yes. Pass the required answers as flags; see [Scripts, CI and coding agents](./recipes#scripts-ci-and-coding-agents).
+
+## How does it compare to other tools?
+
+As of October 2026, from the documentation of each tool:
+
+|                                 | commit-jazzer                   | [cz-git / czg](https://cz-git.qbb.sh) | [gitmoji-cli](https://github.com/carloscuesta/gitmoji-cli) | [better-commits](https://github.com/Everduin94/better-commits) |
+| ------------------------------- | ------------------------------- | ------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------- |
+| Standalone CLI                  | ✅                              | ✅                                    | ✅                                                         | ✅                                                             |
+| Commitizen adapter              | ✅                              | ✅                                    | —                                                          | —                                                              |
+| `prepare-commit-msg` hook       | ✅                              | ✅                                    | ✅                                                         | —                                                              |
+| Conventional Commits output     | ✅                              | ✅                                    | — (`:emoji: (scope): title`)                               | ✅                                                             |
+| Non-interactive flags           | ✅                              | aliases                               | prefill only                                               | ✅                                                             |
+| Reads the commitlint config     | scopes, lengths                 | ✅                                    | —                                                          | —                                                              |
+| Type and ticket from the branch | ✅                              | via recipe                            | —                                                          | ✅                                                             |
+| Config                          | JSON / TS / JS / `package.json` | JS / TS / commitlint config           | JSON / `package.json`                                      | JSONC                                                          |
+| Built-in prompt translations    | 13 languages                    | — (texts are configurable)            | —                                                          | —                                                              |
+| AI suggestions                  | —                               | ✅                                    | —                                                          | —                                                              |
+
+Pick cz-git if you want AI messages or one config file shared with commitlint; gitmoji-cli if you want gitmoji's own format.
+
+## How do I add a language?
+
+Copy `src/core/i18n/locales/en.json`, translate the values, and add the language to `LANGUAGES` in `src/shared/constants.ts` and to `src/core/i18n/i18n.ts`. A test checks that every language has the same keys and placeholders.
+
+---
+
+---
+url: /commit-jazzer/reference/config.md
+---
+# Config options
+
+Generated from the [JSON Schema](/commit-jazzer-schema.json), which is generated from the validation code, so this page always matches what the config loader accepts. Every option is optional.
+
+---
+
+---
+url: /commit-jazzer/reference/cli.md
+---
+# CLI
+
+The package installs one command under two names: `jazzer` and `commit-jazzer`.
+
+## `jazzer [options] [-- <git commit arguments>]`
+
+Asks the questions, shows the message and runs `git commit`. Exits with git's exit code.
+
+### Answers
+
+Each flag answers its question, which is then not asked. An empty value (`--breaking ""`) answers with nothing. A flag for a question that is not in `availablePromptQuestions` still goes into the message.
+
+| Option                | Answers                                  |
+| --------------------- | ---------------------------------------- |
+| `-t, --type <type>`   | Commit type, e.g. `feat`.                |
+| `-s, --scope <scope>` | Scope (the component).                   |
+| `-m, --title <title>` | Title.                                   |
+| `-b, --body <text>`   | Description; `\|` starts a new line.     |
+| `--breaking <text>`   | Breaking change; adds `!` to the header. |
+| `-i, --issues <ids>`  | Related issues, e.g. `"12, 34"`.         |
+| `--comment <text>`    | Extra body paragraph.                    |
+
+Flags are validated like typed answers: an unknown type, a scope outside `scopes` with `allowCustomScopes: false`, a title over the limit, a line break in a header field or parentheses in the scope is an error. So is an answer the template never writes (`--breaking` with a template without `{{breaking}}`), and `--retry` with answers.
+
+### Options
+
+| Option                    | Description                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| `-y, --yes`               | No confirmation; only required questions without a flag are asked.               |
+| `-n, --dry-run`           | Print the message to stdout instead of committing. Does not need staged changes. |
+| `-r, --retry`             | Commit the last message again, without questions.                                |
+| `-c, --config <path>`     | Use this config file instead of searching. Also `$JAZZER_CONFIG`.                |
+| `--banner`, `--no-banner` | Show or hide the banner for this run.                                            |
+| `-a, --all`               | `git commit --all`.                                                              |
+| `--amend`                 | `git commit --amend`.                                                            |
+| `--no-verify`             | `git commit --no-verify`.                                                        |
+| `-h, --help`              | Show the help.                                                                   |
+| `-v, --version`           | Show the version.                                                                |
+
+Everything after `--` goes to `git commit` unchanged, files included:
+
+```sh
+jazzer -- -S --author "Jane <jane@example.com>"
+jazzer -- src/parser.ts
+```
+
+Without a terminal (CI, scripts, pipes) nothing is asked and nothing is guessed from the branch: optional answers without a flag stay empty, and a missing required one is an error naming its flag.
+
+## `jazzer :<alias>`
+
+Commits the answers of an [alias](/guide/configuration#frequent-commits) from the config, without questions or confirmation. Answer flags override the alias: `jazzer :deps -i 31`. `--alias <name>` is the same.
+
+## `jazzer init`
+
+Creates `jazzer.config.json` in the root of the repository (the current directory outside one). With a config present it exits with 1, unless `--force` replaces `jazzer.config.json`/`.ts`; with `--hook` or `--lint` it keeps the config and only installs the hooks. A config in `.jazzerrc` or `package.json` is never replaced.
+
+| Option          | Description                                                                                                                 |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `--ts`          | Write `jazzer.config.ts` instead.                                                                                           |
+| `--hook`        | Also install the `prepare-commit-msg` hook that asks the questions on `git commit`.                                         |
+| `--lint`        | Also install the `commit-msg` hook that runs `jazzer lint` on every message.                                                |
+| `--remove-hook` | Remove the hooks `init` installed; hooks written by someone else stay.                                                      |
+| `-f, --force`   | Replace `jazzer.config.json` or `jazzer.config.ts` (leaving one of them). Other configs and other hooks are never replaced. |
+
+Hooks go to `.husky/` when husky runs the hooks, and to git's hooks directory otherwise (`core.hooksPath` and worktrees are respected). They run the project's `commit-jazzer`, then a global one, and do nothing when neither is installed.
+
+## `jazzer lint [file]`
+
+Checks a commit message against the config: the `type(scope): subject` header, the type, a closed scope list, a non-empty subject, `headerMaxLength`, the blank line after the header and `bodyLineLength` for body lines. Reads `.git/COMMIT_EDITMSG` without a file. git's comment lines (`core.commentChar`) and the diff of `git commit -v` are ignored; merges, reverts, reapplies and `fixup!` commits pass. Exits with 1 when something is wrong.
+
+| Option                | Description           |
+| --------------------- | --------------------- |
+| `-c, --config <path>` | Use this config file. |
+
+## `jazzer hook <file> [source]`
+
+Fills the message file from a `prepare-commit-msg` hook; `file` and `source` are the hook's `$1` and `$2`. Commits that already have a message (`message`, `template`, `merge`, `squash`, `commit` sources) and commits without a terminal are left alone.
+
+| Option                | Description           |
+| --------------------- | --------------------- |
+| `-c, --config <path>` | Use this config file. |
+
+## Exit codes
+
+| Code  | Meaning                                                                                                                  |
+| ----- | ------------------------------------------------------------------------------------------------------------------------ |
+| `0`   | Committed, printed with `--dry-run`, `init` or `lint` succeeded, or `hook` left a commit alone.                          |
+| `1`   | Invalid arguments, config or answers; blocked words; nothing staged; a cancelled confirmation; a message `lint` rejects. |
+| other | A failed `git commit`: its own exit code.                                                                                |
+| `130` | Interrupted with Ctrl+C.                                                                                                 |
+
+---
+
+---
+url: /commit-jazzer/reference/commit-types.md
+---
+# Commit types
+
+The built-in types, in the order of the selection list. Limit them with `availableCommitTypes`, change one with `baseCommitTypes`, add your own with `addCustomCommitTypes` (see [Configuration](/guide/configuration#fewer-types-changed-types-new-types)).
+
+---
+
+---
+url: /commit-jazzer/reference/api.md
+---
+# JavaScript API
+
+The package is a CLI first. From JavaScript it offers what configs and Commitizen need; types are included.
+
+## `defineConfig(config)`
+
+Returns the config unchanged and types it, for autocompletion in `jazzer.config.ts` or `.js`:
+
+```ts
+import { defineConfig } from 'commit-jazzer';
+
+export default defineConfig({
+  scopes: ['api', 'web']
+});
+```
+
+## `JazzerConfig`
+
+The type of a config, for configs that build the object elsewhere:
+
+```ts
+import type { JazzerConfig } from 'commit-jazzer';
+
+const shared: JazzerConfig = { language: 'de' };
+```
+
+`CommitJazzerPrompterOptions`, the name from 1.x, still works and is deprecated.
+
+## `BUILT_IN_COMMIT_TYPE_NAMES`
+
+The names of the built-in commit types, e.g. for commitlint's `type-enum` (see [Recipes](/guide/recipes#check-commits-with-commitlint)).
+
+## `prompter`
+
+The Commitizen adapter. Commitizen finds it by itself through `"path": "commit-jazzer"`; you don't call it. `require('commit-jazzer')` returns only this function.
+
+Anything else (running the questions, formatting or linting a message) goes through the CLI: `jazzer --dry-run` prints a message, `jazzer lint` checks one.
