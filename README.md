@@ -1,13 +1,57 @@
-# commit-jazzer
+<p align="center">
+  <img src="https://zilero232.github.io/commit-jazzer/logo.svg" alt="" width="88" height="88">
+</p>
 
-[![Checks](https://img.shields.io/github/actions/workflow/status/Zilero232/commit-jazzer/checks.yml?branch=main&label=checks&logo=github)](https://github.com/Zilero232/commit-jazzer/actions/workflows/checks.yml)
-[![npm](https://img.shields.io/npm/v/commit-jazzer?logo=npm)](https://www.npmjs.com/package/commit-jazzer)
-[![downloads](https://img.shields.io/npm/dm/commit-jazzer)](https://www.npmjs.com/package/commit-jazzer)
-[![license](https://img.shields.io/npm/l/commit-jazzer)](LICENSE)
+<h1 align="center">commit-jazzer</h1>
 
-Interactive [Conventional Commits](https://www.conventionalcommits.org) with emoji. Pick a type, type a title, and get a message that commitlint and semantic-release understand. Use it as a CLI, as a git hook, or as a Commitizen adapter.
+<p align="center">
+  <b>Conventional Commits with emoji, without remembering the rules.</b><br>
+  Pick a type, type a title — get a message commitlint and semantic-release accept.
+</p>
 
-**[Documentation](https://zilero232.github.io/commit-jazzer/)** · **[Playground](https://zilero232.github.io/commit-jazzer/playground)** · **[Config options](https://zilero232.github.io/commit-jazzer/reference/config)**
+<p align="center">
+  <a href="https://www.npmjs.com/package/commit-jazzer"><img src="https://img.shields.io/npm/v/commit-jazzer?color=7c3aed&logo=npm" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/commit-jazzer"><img src="https://img.shields.io/npm/dm/commit-jazzer?color=7c3aed" alt="npm downloads"></a>
+  <a href="https://github.com/Zilero232/commit-jazzer/actions/workflows/checks.yml"><img src="https://img.shields.io/github/actions/workflow/status/Zilero232/commit-jazzer/checks.yml?branch=main&label=checks&logo=github" alt="checks"></a>
+  <a href="https://www.conventionalcommits.org"><img src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196?logo=conventionalcommits&logoColor=white" alt="Conventional Commits"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/npm/l/commit-jazzer?color=7c3aed" alt="license"></a>
+</p>
+
+<p align="center">
+  <a href="https://zilero232.github.io/commit-jazzer/">Documentation</a> ·
+  <a href="https://zilero232.github.io/commit-jazzer/playground">Playground</a> ·
+  <a href="https://zilero232.github.io/commit-jazzer/reference/config">Config options</a> ·
+  <a href="https://zilero232.github.io/commit-jazzer/reference/cli">CLI</a>
+</p>
+
+<p align="center">
+  <img src="https://zilero232.github.io/commit-jazzer/demo.gif" alt="jazzer asks for the type, scope, title and description, then commits feat(auth): ✨ add login with passkeys" width="800">
+</p>
+
+## Quick start
+
+```sh
+npm install --save-dev commit-jazzer
+git add .
+npx jazzer
+```
+
+> [!NOTE]
+> Before installing, try it with `npx commit-jazzer`: `npx jazzer` without the package installed fetches an unrelated package.
+
+Requires Node.js 22.13 or newer.
+
+## Three ways to use it
+
+| You run                                 | What happens                                                                                 |
+| --------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `npx jazzer`                            | Asks the questions, shows the message, runs `git commit`.                                    |
+| `git commit` after `jazzer init --hook` | The `prepare-commit-msg` hook asks the same questions inside plain `git commit`.             |
+| `git cz`                                | Works as a Commitizen adapter: `{ "config": { "commitizen": { "path": "commit-jazzer" } } }` |
+
+Messages written by hand can be checked too: `jazzer init --lint` installs a `commit-msg` hook that runs `jazzer lint`.
+
+## What you get
 
 ```text
 feat(auth)!: ✨ add login with passkeys
@@ -18,57 +62,33 @@ BREAKING CHANGE: the /login endpoint no longer accepts passwords
 Closes #42
 ```
 
+Valid [Conventional Commits](https://www.conventionalcommits.org): the tests run every message through commitlint and the parser semantic-release uses, so releases and changelogs keep working.
+
 ## Features
 
-- Fuzzy search over 43 commit types with emoji: `f` finds `feat` and `fix`, `bug` finds `fix`.
-- Scope, breaking change and issue questions, and a header counter that keeps you within commitlint's 100 characters.
-- Valid Conventional Commits output, checked against commitlint and the semantic-release parser in the tests.
-- Scopes and length limits from your commitlint config; type and ticket suggested from the branch name.
-- Every answer as a flag for scripts, CI and coding agents; aliases for frequent commits; `--dry-run` and `--retry`.
-- `jazzer lint` and a `commit-msg` hook for messages written with plain `git commit -m`.
-- A typed config in JSON, TypeScript, JavaScript or `package.json`, with a JSON Schema for editor autocompletion.
-- Prompts in 13 languages, and an optional profanity filter.
+- **Fuzzy type search.** 43 types with emoji; `f` finds `feat` and `fix`, `bug` finds `fix`.
+- **Guesses from the branch.** On `feat/42-passkeys` the type is `feat` and the issue is `#42` before you type anything.
+- **Stays within limits.** Reads scopes and length limits from your commitlint config; a counter keeps the header under the limit.
+- **Scriptable.** Every answer is a flag, so CI, scripts and AI coding agents commit without prompts.
+- **Aliases** for frequent commits: `jazzer :deps` instead of the same five answers every week.
+- **Typed config** in JSON, TypeScript, JavaScript or `package.json`, with a JSON Schema for editor autocompletion.
+- **13 languages** for the prompts, and an optional profanity filter.
 
-## Install
+## Scripts, CI and AI agents
 
-Node.js 22.13 or newer.
-
-```sh
-npm install --save-dev commit-jazzer
-```
-
-The command is `jazzer` (or `commit-jazzer`). Before installing, try it with `npx commit-jazzer`: `npx jazzer` would fetch an unrelated package.
-
-## Use
-
-Stage your changes, then pick one of:
-
-```sh
-npx jazzer                 # ask, confirm, run git commit
-npx jazzer init --hook     # make plain `git commit` ask the questions (also writes a config)
-npx jazzer init --lint     # check messages of `git commit -m`
-```
-
-or keep using `git cz` with Commitizen:
-
-```json
-{ "config": { "commitizen": { "path": "commit-jazzer" } } }
-```
-
-With every answer as a flag and `-y`, nothing is asked (without a terminal, `-y` is implied):
+Give the answers as flags and nothing is asked. Without a terminal, `-y` is implied.
 
 ```sh
 npx jazzer -t fix -s parser -m "handle empty input" -i 31 -y
+npx jazzer -n -t docs -m "fix typos"     # print the message, do not commit
+npx jazzer -- --amend src/parser.ts      # anything after -- goes to git commit
 ```
 
 ## Configure
 
-```sh
-npx jazzer init --ts
-```
+`npx jazzer init --ts` writes `jazzer.config.ts`:
 
 ```ts
-// jazzer.config.ts
 import { defineConfig } from 'commit-jazzer';
 
 export default defineConfig({
@@ -80,11 +100,11 @@ export default defineConfig({
 });
 ```
 
-See [Configuration](https://zilero232.github.io/commit-jazzer/guide/configuration) and [Migrating from 1.x](https://zilero232.github.io/commit-jazzer/guide/migration).
+Every option is in the [config reference](https://zilero232.github.io/commit-jazzer/reference/config). Coming from 1.x? See [Migrating from 1.x](https://zilero232.github.io/commit-jazzer/guide/migration).
 
 ## Contributing
 
-Bug reports and pull requests are welcome; read [CONTRIBUTING.md](CONTRIBUTING.md) first. Security issues: see [SECURITY.md](SECURITY.md).
+Bug reports and pull requests are welcome: start with [CONTRIBUTING.md](CONTRIBUTING.md). Security issues go through [SECURITY.md](SECURITY.md).
 
 ## License
 

@@ -36,6 +36,8 @@ features:
 
 ## What a commit looks like
 
+![jazzer asks for the type, scope, title and description, then commits](/demo.gif)
+
 ```text
 feat(auth)!: ✨ add login with passkeys
 

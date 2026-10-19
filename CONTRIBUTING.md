@@ -30,6 +30,8 @@ Without mise, install the bun and Node versions from `mise.toml` yourself.
 
 `bun run test`, not `bun test`: the tests run on Vitest.
 
+The README demo is recorded with [VHS](https://github.com/charmbracelet/vhs): after `bun run build`, run `mise x vhs ttyd -- vhs scripts/demo/demo.tape` to update `site/public/demo.gif`.
+
 ## Code
 
 ```text
