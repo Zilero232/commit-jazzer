@@ -33,7 +33,7 @@ Community leaders have the right and responsibility to remove, edit, or reject c
 
 ## Reporting
 
-If you experience or witness any unacceptable behavior, or have any concerns, please report it by contacting us at [sasha.artemev.1002@mail.ru]. All reports will be reviewed and investigated promptly and fairly.
+If you experience or witness any unacceptable behavior, or have any concerns, please report it by email to <sasha.artemev.1002@mail.ru>. All reports will be reviewed and investigated promptly and fairly.
 
 ## Scope
 

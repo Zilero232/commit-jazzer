@@ -1,0 +1,10 @@
+export type AliasesInput = { alias: string; known: string[] };
+export type AliasTwiceInput = { positional: string; flag: string };
+export type BodyLengthInput = { line: number; length: number; max: number };
+export type ConfigIssueInput = { source: string; details: string };
+export type FileReasonInput = { path: string; reason: string };
+export type HeaderLengthInput = { length: number; max: number };
+export type HookExistsInput = { path: string; command: string };
+export type InAliasInput = { reason: string; alias: string };
+export type NoFieldInput = { path: string; field: string };
+export type OneOfInput = { value: string; allowed: string[] };

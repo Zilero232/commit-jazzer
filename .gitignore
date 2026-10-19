@@ -1,73 +1,44 @@
-# ===========================
-# Compiled output
-# ===========================
-/coverage
-/cache
-*.log
-
-# ===========================
-# Schema config
-# ===========================
-commit-jazzer-schema.json
-
-# ===========================
 # Dependencies
-# ===========================
-node_modules
+node_modules/
+
+# Build output (dist/ and the generated JSON Schema are rebuilt by `bun run build`)
+dist/
+schema.json
+
+# Tests and caches
+coverage/
+.cache/
+.eslintcache
+.cspellcache
+*.tsbuildinfo
+
+# Lockfiles of other package managers: this repo uses bun (bun.lock)
 package-lock.json
 pnpm-lock.yaml
+yarn.lock
 
-# ===========================
-# Build output
-# ===========================
-build
+# Logs
+*.log
 
-# ===========================
-# IDEs and editors
-# ===========================
+# Local environment
+.env
+.env.*
+!.env.example
+mise.local.toml
 
-# IntelliJ IDEA
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# VS Code
+# Editors
+.idea/
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
 !.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*~
 
-# ===========================
-# Local development files
-# ===========================
-.env.local
-.bashrc
-.nx
-.
-
-# ===========================
-# Miscellaneous files
-# ===========================
-CHANGELOG.md
-npm-debug.log
-yarn-error.log
-
-# ===========================
-# System files
-# ===========================
+# OS
 .DS_Store
 Thumbs.db
 
-# ===========================
-# Temporary or OS-specific files
-# ===========================
-*.swp                # Vim swap files
-*.swo                # Vim backup files
-*.bak                # Backup files
-*~                   # Temporary files created by editors
-
+# Docs site (the schema copy is generated)
+site/.vitepress/cache/
+site/.vitepress/dist/
+site/public/commit-jazzer-schema.json

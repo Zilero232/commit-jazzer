@@ -1,43 +1,60 @@
-# Contributing to commit-jazzer 🎶
+# Contributing
 
-Thank you for your interest in contributing to `commit-jazzer`! We welcome contributions that enhance the functionality of the project or improve the documentation. By contributing, you're helping make this project better for everyone.
+## Reporting a bug
 
-Please follow the guidelines below to help us make the process smooth for both you and the maintainers.
+Open an [issue](https://github.com/Zilero232/commit-jazzer/issues/new/choose) with the command you ran, what you expected, what happened, your config, and the output of `node --version` and `npx jazzer --version`.
 
-## Table of Contents
+## Setup
 
-- [Reporting Bugs](#reporting-bugs)
-- [Suggesting Enhancements](#suggesting-enhancements)
-- [Making Changes](#making-changes)
-- [Code Style](#code-style)
-- [Commit Message Guidelines](#commit-message-guidelines)
-- [Pull Request Process](#pull-request-process)
-- [License](#license)
+The toolchain is pinned in `mise.toml` (bun for scripts, Node for the CLI and tests).
 
-## Reporting Bugs
-
-If you find a bug or issue, please open an issue on the GitHub repository. When reporting a bug, please include the following details:
-
-- **Steps to reproduce**: A clear and concise description of what you did to encounter the issue.
-- **Expected behavior**: What you expected to happen.
-- **Actual behavior**: What actually happened.
-- **Environment**: Information about your environment (OS, Node.js version, etc.).
-
-## Suggesting Enhancements
-
-We love ideas for making `commit-jazzer` even better! If you have a suggestion or feature request, feel free to open an issue and describe:
-
-- The problem you're trying to solve.
-- How your idea will help improve the project.
-
-## Making Changes
-
-To get started with contributing code, please fork the repository and create a new branch for your changes. You can do this by running the following commands:
-
-```bash
-# Fork the repository
+```sh
 git clone https://github.com/Zilero232/commit-jazzer.git
-
-# Create a new branch
-git checkout -b feature/my-new-feature
+cd commit-jazzer
+mise install
+bun install
 ```
+
+Without mise, install the bun and Node versions from `mise.toml` yourself.
+
+## Commands
+
+| Command            |                                                             |
+| ------------------ | ----------------------------------------------------------- |
+| `bun run build`    | JSON Schema + `dist/` (tsdown, checked by publint)          |
+| `bun run test`     | Vitest; `bun run test:coverage` for coverage                |
+| `bun run verify`   | typecheck, lint, format check, spelling, unused code (knip) |
+| `bun run fix`      | apply lint and format fixes                                 |
+| `bun run docs:dev` | the documentation site on localhost                         |
+| `bun run commit`   | commit with the CLI built from your checkout                |
+
+`bun run test`, not `bun test`: the tests run on Vitest.
+
+## Code
+
+```text
+src/
+  core/        pure logic: config schema, commit types, message format, questions, lint, run policy, profanity, i18n
+  io/          everything that touches the outside world: git, prompts, terminal, config files, banner, logging
+  app/         the flow shared by every entry point (runJazzer) and result reporting
+  cli/         the jazzer command: args/ (parsing), commands/ (commit, init, hook, lint)
+  commitizen/  the Commitizen adapter
+  shared/      constants, styles, the Handlebars compiler, test helpers and setup
+```
+
+- `core/` never imports from `io/`, `app/` or `cli/`.
+- One folder per module; inside it one file per unit (`build-questions.ts`) plus `x.types.ts`, `x.constants.ts`, `x.schema.ts`, `x.utils.ts`, `index.ts`, and tests in `_tests/`.
+- `type`, never `interface`; no `as` casts; named arrow-function exports; two or more parameters become one object.
+- Prefer a well-known package (remeda, ts-pattern, …) over a hand-written helper.
+- A config option is added in `src/core/config/config.schema.ts` with a `.meta({ description })`: the JSON Schema is generated from it, and the docs page renders that schema.
+- A new prompt text goes into every file in `src/core/i18n/locales/`; a test fails otherwise.
+
+## Commits and pull requests
+
+Commit messages follow Conventional Commits, checked by commitlint. Use the tool itself: `bun run commit`.
+
+Before opening a pull request, run `bun run verify` and `bun run test`, and add tests for the change. Releases are made by semantic-release from the commits on `main`.
+
+## Code of Conduct
+
+This project follows the [Code of Conduct](CODE_OF_CONDUCT.md).

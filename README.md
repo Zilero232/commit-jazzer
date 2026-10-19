@@ -1,229 +1,91 @@
-# commit-jazzer 🎶💥
+# commit-jazzer
 
-<p align="center">
-	<a href="https://github.com/Zilero232/commit-jazzer">
-    	<img src="https://img.shields.io/github/actions/workflow/status/Zilero232/commit-jazzer/integrate.yaml?label=CI&logo=GitHub" alt="CI status">
-  	</a>
-	<a href="https://www.npmjs.com/package/commit-jazzer">
-    	<img src="https://img.shields.io/npm/dm/commit-jazzer?logo=NPM" alt="npm downloads">
-  	</a>
-	<a href="https://github.com/Zilero232/cli">
-    	<img src="https://img.shields.io/npm/l/cz-vinyl" alt="npm license">
-  	</a>
-	<a href="https://github.com/Zilero232/commit-jazzer">
-    	<img src="https://img.shields.io/npm/v/commit-jazzer?label=version" alt="version">
-  	</a>
-</p>
+[![Checks](https://img.shields.io/github/actions/workflow/status/Zilero232/commit-jazzer/checks.yml?branch=main&label=checks&logo=github)](https://github.com/Zilero232/commit-jazzer/actions/workflows/checks.yml)
+[![npm](https://img.shields.io/npm/v/commit-jazzer?logo=npm)](https://www.npmjs.com/package/commit-jazzer)
+[![downloads](https://img.shields.io/npm/dm/commit-jazzer)](https://www.npmjs.com/package/commit-jazzer)
+[![license](https://img.shields.io/npm/l/commit-jazzer)](LICENSE)
 
-> **Commitizen adapter** for formatting commit messages with style and rhythm. 🎸🎤
+Interactive [Conventional Commits](https://www.conventionalcommits.org) with emoji. Pick a type, type a title, and get a message that commitlint and semantic-release understand. Use it as a CLI, as a git hook, or as a Commitizen adapter.
 
-🎸 Add style and rhythm to your commits! With commit-jazzer, every commit becomes more than just a message—it's a true masterpiece. Follow best practices and format your messages with emojis that add fun and professionalism to your development process.
+**[Documentation](https://zilero232.github.io/commit-jazzer/)** · **[Playground](https://zilero232.github.io/commit-jazzer/playground)** · **[Config options](https://zilero232.github.io/commit-jazzer/reference/config)**
 
-## Table of Contents
+```text
+feat(auth)!: ✨ add login with passkeys
 
-1. [🎥 Demo](#-demo)
-2. [🔍 Description](#-description)
-3. [⚡ Features](#-features)
-4. [💻 Installation and Usage](#-installation-and-usage)
-5. [⚙️ Configuration](#-configuration)
-6. [🤝 Contributing](#-contributing)
-7. [📜 Code of Conduct](#-code-of-conduct)
-8. [🔒 Security Policy](#-security-policy)
-9. [👥 Team](#-team)
-10. [📄 License](#-license)
+Passkeys replace passwords for new accounts.
 
-## 🎥 Demo
+BREAKING CHANGE: the /login endpoint no longer accepts passwords
+Closes #42
+```
 
-![commit-jazzer](public/commit-demo.gif)
+## Features
 
-## 🔍 Description
+- Fuzzy search over 43 commit types with emoji: `f` finds `feat` and `fix`, `bug` finds `fix`.
+- Scope, breaking change and issue questions, and a header counter that keeps you within commitlint's 100 characters.
+- Valid Conventional Commits output, checked against commitlint and the semantic-release parser in the tests.
+- Scopes and length limits from your commitlint config; type and ticket suggested from the branch name.
+- Every answer as a flag for scripts, CI and coding agents; aliases for frequent commits; `--dry-run` and `--retry`.
+- `jazzer lint` and a `commit-msg` hook for messages written with plain `git commit -m`.
+- A typed config in JSON, TypeScript, JavaScript or `package.json`, with a JSON Schema for editor autocompletion.
+- Prompts in 13 languages, and an optional profanity filter.
 
-**`commit-jazzer`** is a tool that introduces a touch of musical flair into your Git commit messages. Built on the solid foundation of Commitizen, it allows you to follow commit conventions and spice up your messages with emojis. Instead of just typing standard commit texts, you'll choose commit types, write descriptions, and—just like in jazz—improvise to create a symphony of commits.
+## Install
 
-🎷 **Jazz your commits**: It's not just about structure—it's about creativity. Transform your commits into something dynamic, creative, and fun!
-
-## ⚡ Features
-
-- 🎶 **Musical Commit Messages**: Format your commits with delightful emojis like 🎸, 🐛, 💄, and more.
-- ⚡ **Quick Setup**: Easy installation and integration into your project.
-- 🎼 **Predefined Commit Types**: Choose from predefined types and descriptions to maintain consistency.
-- 🛠 **Bad Word Handling**: Automatically handles undesirable words in commit messages and helps you avoid inappropriate expressions.
-- 🔧 **Flexible Configuration**: Customize commit templates and type schemes for a personal touch.
-
-## 💻 Installation and Usage
-
-### Globally
-
-Install `commitizen` globally, if you have not already.
+Node.js 22.13 or newer.
 
 ```sh
-npm install commitizen -g
-```
-
-Install your preferred `commitizen` adapter globally (for example [`commit-jazzer`](https://www.npmjs.com/package/commit-jazzer)).
-
-```sh
-npm install commit-jazzer -g
-```
-
-Create a `.czrc` file in your `home` directory, with `path` referring to the preferred, globally-installed, `commitizen` adapter
-
-```sh
-echo '{ "path": "commit-jazzer" }' > ~/.czrc
-```
-
-You are all set! Now `cd` into any `git` repository and use `git cz` and you will find the `commit-jazzer` prompt.
-
-Or you can, add this configuration to your `package.json`:
-
-```json
-"config": {
-  "commitizen": {
-    "path": "commit-jazzer"
-  }
-}
-```
-
-### Locally
-
-To install `commit-jazzer` as a development dependency, run::
-
-```bash
 npm install --save-dev commit-jazzer
 ```
 
-Then, add this configuration to your `package.json`:
+The command is `jazzer` (or `commit-jazzer`). Before installing, try it with `npx commit-jazzer`: `npx jazzer` would fetch an unrelated package.
+
+## Use
+
+Stage your changes, then pick one of:
+
+```sh
+npx jazzer                 # ask, confirm, run git commit
+npx jazzer init --hook     # make plain `git commit` ask the questions (also writes a config)
+npx jazzer init --lint     # check messages of `git commit -m`
+```
+
+or keep using `git cz` with Commitizen:
 
 ```json
-"config": {
-  "commitizen": {
-    "path": "node_modules/commit-jazzer"
+{ "config": { "commitizen": { "path": "commit-jazzer" } } }
+```
+
+With every answer as a flag and `-y`, nothing is asked (without a terminal, `-y` is implied):
+
+```sh
+npx jazzer -t fix -s parser -m "handle empty input" -i 31 -y
+```
+
+## Configure
+
+```sh
+npx jazzer init --ts
+```
+
+```ts
+// jazzer.config.ts
+import { defineConfig } from 'commit-jazzer';
+
+export default defineConfig({
+  scopes: ['api', 'web', 'docs'],
+  availableCommitTypes: ['feat', 'fix', 'docs', 'refactor', 'test', 'chore', 'upgrade'],
+  aliases: {
+    deps: { type: 'upgrade', component: 'deps', title: 'update dependencies' }
   }
-}
+});
 ```
 
-After installation, simply run:
+See [Configuration](https://zilero232.github.io/commit-jazzer/guide/configuration) and [Migrating from 1.x](https://zilero232.github.io/commit-jazzer/guide/migration).
 
-```bash
-git cz
-```
+## Contributing
 
-## ⚙️ Configuration
+Bug reports and pull requests are welcome; read [CONTRIBUTING.md](CONTRIBUTING.md) first. Security issues: see [SECURITY.md](SECURITY.md).
 
-### Configuration Types Support
+## License
 
-This configuration file is used to customize the behavior of commit-jazzer without modifying the source code.
-
-- **JSON format**
-  - `.jazzer.config.json`
-  - `jazzer.config.json`
-
-- **JavaScript format**
-  - `.jazzer.config.js`
-  - `jazzer.config.js`
-
-- **TypeScript format**
-  - `.jazzer.config.ts`
-  - `jazzer.config.ts`
-
-### Example Configuration File
-
-```json
-{
-  "$schema": "https://zilero232.github.io/commit-jazzer/commit-jazzer-schema.json",
-  "language": "en",
-  "template": "{{type}}: {{emoji}} - {{title}}",
-  "availableCommitTypes": ["init", "fix", "refactor"],
-  "availablePromptQuestions": ["type", "title"],
-  "baseCommitTypes": {
-    "init": {
-      "description": "Custom deploying message"
-    }
-  },
-  "addCustomCommitTypes": {
-    "custom": {
-      "emoji": "🚀",
-      "code": ":rocket:",
-      "description": "Deploying application"
-    }
-  },
-  "baseQuestionsOptions": [
-    {
-      "key": "title",
-      "message": "My custom message",
-      "options": {
-        "required": true,
-        "skip": false,
-        "validations": {
-          "length": {
-            "minMessageLength": 0,
-            "maxMessageLength": 200
-          }
-        }
-      }
-    }
-  ],
-  "validateCommitBadWords": true,
-  "badWordsOptions": {
-    "checkHasProfaneWords": true,
-    "clearMessage": true,
-    "replaceProfaneWords": true,
-    "options": {
-      "additionalBlockWords": ["bogdan", "oleg", "nikita"],
-      "excludedWords": ["fool"],
-      "placeholder": "*",
-      "overrideBlockWords": false
-    }
-  },
-  "showBanner": true,
-  "showBannerOptions": {
-    "bannerText": "Look, I can change the name."
-  }
-}
-```
-
-## 🤝 Contributing
-
-We'd love for you to contribute to `commit-jazzer`! Whether it's reporting bugs, suggesting features, or submitting pull requests, your help is always appreciated.
-
-### How to contribute:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/your-feature`).
-3. Make your changes.
-4. Commit your changes (`git commit -am 'Add new feature'`).
-5. Push to the branch (`git push origin feature/your-feature`).
-6. Open a pull request.
-
-## 📜 Code of Conduct
-
-Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) when participating in this project to ensure a welcoming and productive atmosphere.
-
-## 🔒 Security Policy
-
-Security is our priority. If you encounter any issues, please read our full [Security Policy](SECURITY.md) to report vulnerabilities safely and responsibly.
-
-## 👥 Team
-
-These folks keep the project moving and are resources for help.
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="11%">
-        <a href="https://career.habr.com/zilero">
-          <img src="https://avatars.githubusercontent.com/u/68345676?s=400&u=eb7df22c29a8aca48def78ec54a7526601c9fd8f&v=4" width="100" height="100" alt="Artemev Alexandr - Avatar">
-          <br />
-          Artemev A. A.
-        </a>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-## 📄 License
-
-License commit-jazzer is licensed under the [MIT License](LICENSE).
-
-Be part of the musical process! 🎶
-Add some rhythm and style to your commits with commit-jazzer and turn your workflow into a masterpiece! 🎸
+[MIT](LICENSE) © Artemev Alexandr

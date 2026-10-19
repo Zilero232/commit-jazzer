@@ -1,46 +1,35 @@
-import type { CommitJazzerPrompterOptions } from './src/types';
+// The config commit-jazzer uses for its own commits: `bun run commit`.
+import { defineConfig } from './src';
 
-const CommitJazzerConfig: CommitJazzerPrompterOptions = {
-	language: 'en',
-	availableCommitTypes: ['init', 'feat', 'fix', 'refactor', 'docs', 'remove', 'test', 'breaking'],
-	availablePromptQuestions: ['type', 'title'],
-	baseQuestionsOptions: [
-		{
-			key: 'title',
-			options: {
-				validations: {
-					length: {
-						minMessageLength: 0,
-						maxMessageLength: 200,
-					},
-				},
-			},
-		},
-	],
-	baseCommitTypes: {
-		init: {
-			description: 'Custom deploying message',
-		},
-	},
-	addCustomCommitTypes: {
-		custom: {
-			emoji: '🚀',
-			code: ':rocket:',
-			description: 'Deploying application',
-		},
-	},
-	badWordsOptions: {
-		clearMessage: true,
-		options: {
-			additionalBlockWords: ['bogdan', 'dasdasd', 'asdadas'],
-			overrideBlockWords: true,
-			excludedWords: ['fool'],
-		},
-	},
-	showBanner: true,
-	showBannerOptions: {
-		bannerText: 'Look, I can change the name.',
-	},
-};
-
-export default CommitJazzerConfig;
+export default defineConfig({
+  scopes: [
+    'cli',
+    'config',
+    'prompt',
+    'message',
+    'profanity',
+    'banner',
+    'i18n',
+    'commitizen',
+    'deps',
+    'release',
+    'docs'
+  ],
+  availableCommitTypes: [
+    'feat',
+    'fix',
+    'refactor',
+    'perf',
+    'chore',
+    'docs',
+    'test',
+    'build',
+    'ci',
+    'upgrade',
+    'remove',
+    'revert'
+  ],
+  aliases: {
+    deps: { type: 'upgrade', component: 'deps', title: 'update dependencies' }
+  }
+});

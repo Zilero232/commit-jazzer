@@ -1,63 +1,22 @@
-import { existsSync, writeFileSync } from 'node:fs';
-import process from 'node:process';
-import { generateSchema, getProgramFromFiles } from 'typescript-json-schema';
-import type { PartialArgs } from 'typescript-json-schema';
+// The JSON Schema of the config, generated from the zod schema. `bun run build` writes `schema.json`, shipped
+// as `commit-jazzer/schema.json`; the VitePress config writes the site copy, served at the `$schema` URL
+// `jazzer init` writes and rendered by the config reference page.
+import { writeFile } from 'node:fs/promises';
+import { z } from 'zod';
 
-const TS_CONFIG_PATH = 'tsconfig.json';
-const TYPE_FILE_PATH = 'src/types/index.ts';
-const TYPE_NAME = 'CommitJazzerPrompterOptions';
-const OUTPUT_PATH = 'public/commit-jazzer-schema.json';
+import { configSchema } from '../src/core/config/config.schema';
 
-// Console styling
-const colors = {
-	success: '\x1B[32m%s\x1B[0m', // Green
-	error: '\x1B[31m%s\x1B[0m', // Red
-	info: '\x1B[36m%s\x1B[0m', // Cyan
+const OUTPUTS = {
+  package: new URL('../schema.json', import.meta.url),
+  site: new URL('../site/public/commit-jazzer-schema.json', import.meta.url)
 };
 
-// Settings for schema generation
-const settings: PartialArgs = {
-	required: true,
-	ref: false,
-	skipLibCheck: true,
+export const writeSchema = async (target: keyof typeof OUTPUTS): Promise<void> => {
+  const schema = z.toJSONSchema(configSchema, { io: 'input', target: 'draft-2020-12' });
+
+  await writeFile(OUTPUTS[target], `${JSON.stringify(schema, null, 2)}\n`);
 };
 
-// Check if file exists
-const checkFileExists = (path: string, description: string) => {
-	if (!existsSync(path)) {
-		console.error(colors.error, `❌ Error: ${description} not found at path ${path}`);
-
-		process.exit(1);
-	}
-
-	console.log(colors.info, `✓ ${description} found`);
-};
-
-try {
-	console.log(colors.info, '🚀 Starting JSON schema generation...');
-
-	checkFileExists(TS_CONFIG_PATH, 'TypeScript config');
-	checkFileExists(TYPE_FILE_PATH, 'Type definitions file');
-
-	const program = getProgramFromFiles([TYPE_FILE_PATH], {}, TS_CONFIG_PATH);
-
-	console.log(colors.info, '📝 Program AST successfully created');
-
-	const schema = generateSchema(program, TYPE_NAME, settings);
-
-	if (schema) {
-		writeFileSync(OUTPUT_PATH, JSON.stringify(schema, null, 2), 'utf-8');
-
-		console.log(colors.success, `✨ JSON schema successfully generated at: ${OUTPUT_PATH}`);
-	} else {
-		console.error(colors.error, '❌ Schema generation failed: Schema object is null');
-
-		process.exit(1);
-	}
-} catch (error) {
-	console.error(colors.error, '❌ An error occurred during schema generation:');
-
-	console.error(error);
-
-	process.exit(1);
+if (import.meta.main) {
+  await writeSchema('package');
 }

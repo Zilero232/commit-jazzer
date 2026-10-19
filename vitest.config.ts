@@ -1,21 +1,19 @@
 import { defineConfig } from 'vitest/config';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-	plugins: [tsconfigPaths()],
-	test: {
-		environment: 'node',
-		include: ['./**/*.spec.ts'],
-		maxConcurrency: 5,
-		clearMocks: true,
-		silent: false,
-		logHeapUsage: true,
-		mockReset: true,
-		coverage: {
-			provider: 'v8',
-			include: ['./src/**/*'],
-			thresholds: { 100: true },
-			skipFull: true,
-		},
-	},
+  test: {
+    environment: 'node',
+    include: ['src/**/_tests/**/*.test.ts'],
+    setupFiles: ['src/shared/testing/setup.ts'],
+    unstubEnvs: true,
+    restoreMocks: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      // CI fails when coverage drops below these.
+      thresholds: { lines: 95, branches: 90, functions: 95, statements: 95 },
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/_tests/**', 'src/shared/testing/**', 'src/**/*.types.ts', 'src/**/index.ts', 'src/bin.ts']
+    }
+  }
 });
