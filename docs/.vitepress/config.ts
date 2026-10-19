@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress';
 
 import { version } from '../../package.json';
+import { writeSchema } from '../../scripts/generate-schema';
 
 const REPO = 'https://github.com/Zilero232/commit-jazzer';
 
@@ -10,6 +11,10 @@ export default defineConfig({
   base: '/commit-jazzer/',
   lang: 'en-US',
   cleanUrls: true,
+  vite: {
+    // The config reference page renders the schema, and the site serves it at the `$schema` URL.
+    plugins: [{ name: 'commit-jazzer-schema', buildStart: () => writeSchema('docs') }]
+  },
   lastUpdated: true,
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/commit-jazzer/logo.svg' }],

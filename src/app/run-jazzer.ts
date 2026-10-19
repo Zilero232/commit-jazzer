@@ -1,17 +1,17 @@
 import type { RunJazzerInput, RunJazzerResult } from './app.types';
 
 import { getTranslations } from '../core/i18n';
-import { isConventionalTemplate, lintMessage, stripComments } from '../core/lint';
-import { createMessage, templateFields } from '../core/message';
+import { createMessage } from '../core/message';
 import { createProfanityFilter } from '../core/profanity';
 import { AnswerError, buildQuestions, createLengthLimit, inferFromBranch } from '../core/questions';
 import { resolveRunPolicy } from '../core/run-policy';
 import { loadConfig } from '../io/config-loader';
 import { getCurrentBranch } from '../io/git';
-import { logger } from '../io/logger';
-import { askQuestions, confirmMessage, isPromptAbort } from '../io/prompts';
+import { askQuestions, isPromptAbort } from '../io/prompts';
 import { isTerminalInput } from '../io/terminal';
 import { COMMIT_FIELDS } from '../shared/constants';
+import { confirmUntilValid } from './confirm-until-valid';
+import { resolvePreset } from './resolve-preset';
 
 /**
  * The flow shared by the CLI, the git hook and the Commitizen adapter: load the config, show the banner,
@@ -26,29 +26,7 @@ export const runJazzer = async (input: RunJazzerInput = {}): Promise<RunJazzerRe
   const output = context?.output ?? process.stdout;
   const interactive = input.interactive ?? isTerminalInput(context?.input ?? process.stdin);
   const policy = resolveRunPolicy({ config, interactive, yes, alias: alias !== undefined, confirm, showBanner });
-
-  // `Object.hasOwn`: `jazzer :constructor` must not find Object.prototype.constructor.
-  if (alias !== undefined && !Object.hasOwn(config.aliases, alias)) {
-    const known = Object.keys(config.aliases).map((name) => `:${name}`);
-
-    throw new Error(
-      `Unknown alias ":${alias}". ${known.length > 0 ? `Known: ${known.join(', ')}` : 'The config has no aliases.'}`
-    );
-  }
-
-  const preset = { ...(alias === undefined ? {} : config.aliases[alias]), ...flags };
-  const written = templateFields(config.template);
-
-  // An answer the template never writes would be lost without a word: a breaking change, say.
-  const lost = COMMIT_FIELDS.find((field) => preset[field] && !written.has(field));
-
-  if (lost) {
-    throw new AnswerError({
-      code: 'invalid',
-      field: lost,
-      reason: `the template has no {{${lost === 'component' ? 'scope' : lost}}}, so this answer would be lost`
-    });
-  }
+  const preset = resolvePreset({ config, flags, alias });
 
   // Decoration only: never in pipes or scripts. Loaded on use, as figlet reads its fonts from disk.
   if (policy.banner && 'isTTY' in output && output.isTTY) {
@@ -89,35 +67,7 @@ export const runJazzer = async (input: RunJazzerInput = {}): Promise<RunJazzerRe
       return { ...result, answers, config };
     }
 
-    // An edited message is held to the same rules as a generated one: back to the confirmation until it passes.
-    const checkFormat = isConventionalTemplate(config.template);
-    let message = result.message;
-
-    for (;;) {
-      const confirmed = await confirmMessage({ message, translations, context });
-
-      if (confirmed === null) {
-        return { status: 'cancelled', interrupted: false };
-      }
-
-      if (confirmed === message) {
-        const final = message === result.message ? result : createMessage({ config, answers, message });
-
-        return final.status === 'ok' ? { ...final, answers, config } : final;
-      }
-
-      message = stripComments({ message: confirmed }).trim();
-
-      const issues = checkFormat ? lintMessage({ message, config }) : [];
-
-      issues.forEach((issue) => logger.warn(issue.message));
-
-      if (issues.length === 0) {
-        const final = createMessage({ config, answers, message });
-
-        return final.status === 'ok' ? { ...final, answers, config } : final;
-      }
-    }
+    return await confirmUntilValid({ config, answers, message: result.message, translations, context });
   } catch (error) {
     if (isPromptAbort(error)) {
       return { status: 'cancelled', interrupted: true };

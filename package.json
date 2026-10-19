@@ -18,9 +18,6 @@
     "type": "git",
     "url": "git+https://github.com/Zilero232/commit-jazzer.git"
   },
-  "bugs": {
-    "url": "https://github.com/Zilero232/commit-jazzer/issues"
-  },
   "keywords": [
     "git",
     "commit",
@@ -34,7 +31,6 @@
     "prepare-commit-msg",
     "cli"
   ],
-  "sideEffects": false,
   "exports": {
     ".": {
       "import": {
@@ -46,8 +42,7 @@
         "default": "./index.cjs"
       }
     },
-    "./schema.json": "./schema.json",
-    "./package.json": "./package.json"
+    "./schema.json": "./schema.json"
   },
   "main": "./index.cjs",
   "types": "./index.d.cts",
@@ -56,40 +51,27 @@
     "jazzer": "./dist/cli.mjs"
   },
   "files": [
-    "!dist/cli.d.mts",
     "dist",
     "index.cjs",
     "index.d.cts",
     "schema.json"
   ],
-  "config": {
-    "commitizen": {
-      "path": "./index.cjs"
-    }
-  },
   "engines": {
     "node": ">=22.13.0"
   },
   "scripts": {
-    "build": "bun run generate-schema && tsdown",
-    "dev": "tsdown --watch",
-    "docs:dev": "bun run generate-schema && vitepress dev docs",
-    "docs:build": "bun run generate-schema && vitepress build docs",
-    "docs:preview": "vitepress preview docs",
-    "generate-schema": "bun ./scripts/generate-schema.ts",
-    "generate-fonts": "bun ./scripts/generate-fonts.ts",
+    "build": "bun scripts/generate-schema.ts && tsdown",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
     "format:check": "prettier --check .",
     "spell": "cspell lint --config ./cspell.json --gitignore --no-progress --no-must-find-files .",
-    "knip": "knip",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "verify": "bun run typecheck && bun run lint && bun run format:check && bun run spell && bun run knip",
-    "fix": "bun run lint:fix && bun run format",
+    "verify": "bun run typecheck && bun run lint && bun run format:check && bun run spell && knip",
+    "fix": "eslint . --fix && prettier --write .",
     "commit": "bun run build && node ./dist/cli.mjs",
     "prepublishOnly": "bun run build",
     "prepare": "husky"
@@ -112,11 +94,8 @@
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@commitlint/lint": "^21.2.4",
-    "@cspell/dict-ru_ru": "^2.3.4",
     "@semantic-release/changelog": "^7.0.0",
     "@semantic-release/git": "^11.0.1",
-    "@semantic-release/github": "^12.0.10",
-    "@semantic-release/npm": "^13.2.0",
     "@siberiacancode/eslint": "^2.18.1",
     "@siberiacancode/prettier": "^1.9.0",
     "@siberiacancode/tsconfig": "^1.2.0",
@@ -138,8 +117,7 @@
     "tsdown": "^0.23.1",
     "typescript": "~6.0.3",
     "vitepress": "^1.6.4",
-    "vitest": "^5.0.5",
-    "vue": "^3.5.44"
+    "vitest": "^5.0.5"
   },
   "lint-staged": {
     "*.{js,mjs,cjs,ts,mts,cts}": [

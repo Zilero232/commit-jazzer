@@ -1,8 +1,8 @@
 import { styleText } from 'node:util';
 
-import { PACKAGE_NAME } from '../../shared/constants';
+import type { Level, LogInput } from './logger.types';
 
-type Level = 'error' | 'info' | 'success' | 'warn';
+import { PACKAGE_NAME } from '../../shared/constants';
 
 const STYLES = {
   info: 'cyan',
@@ -12,7 +12,7 @@ const STYLES = {
 } as const satisfies Record<Level, Parameters<typeof styleText>[0]>;
 
 // Everything goes to stderr: stdout is reserved for the prompts and the `--dry-run` message.
-const write = ({ level, message }: { level: Level; message: string }) => {
+const write = ({ level, message }: LogInput) => {
   process.stderr.write(`${styleText(STYLES[level], `[${PACKAGE_NAME}]`, { stream: process.stderr })} ${message}\n`);
 };
 

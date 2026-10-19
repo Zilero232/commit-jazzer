@@ -1,8 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
   "version": "0.2",
-  "language": "en,ru",
-  "import": ["@cspell/dict-ru_ru/cspell-ext.json"],
+  "language": "en",
   "ignorePaths": [
     "node_modules",
     "dist",
@@ -57,5 +56,6 @@
     "unstub",
     "worktrees",
     "zilero"
-  ]
+  ],
+  "ignoreRegExpList": ["[\\u0400-\\u04FF]+"]
 }

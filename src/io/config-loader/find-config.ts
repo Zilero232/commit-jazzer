@@ -6,6 +6,7 @@ import { realpath } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isNullish } from 'remeda';
 
 import type { ExplorerInput, FindConfigInput, FoundConfig, FoundInput } from './config-loader.types';
 
@@ -81,7 +82,7 @@ export const findConfig = async ({ cwd, configPath, env }: FindConfigInput): Pro
 
     const result = await explorer({ searchPlaces: CONFIG_FILE_NAMES }).load(path);
 
-    if (basename(path) === 'package.json' && (result?.config ?? undefined) === undefined) {
+    if (basename(path) === 'package.json' && isNullish(result?.config)) {
       throw new ConfigError(`${path} has no "${PACKAGE_JSON_FIELD}" field.`);
     }
 

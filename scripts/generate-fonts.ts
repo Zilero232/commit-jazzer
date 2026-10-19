@@ -1,4 +1,4 @@
-// Writes the list of figlet fonts as a constant: `bun run generate-fonts` after upgrading figlet.
+// Writes the list of figlet fonts as a constant: `bun scripts/generate-fonts.ts` after upgrading figlet.
 // The config schema validates `figletOptions.font` against it without reading the disk at import time;
 // a test fails when the list and the installed figlet disagree.
 import figlet from 'figlet';

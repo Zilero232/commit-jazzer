@@ -1,7 +1,8 @@
 import escapeStringRegexp from 'escape-string-regexp';
 import { unique } from 'remeda';
 
-import type { ProfanityFilter, ProfanityFilterOptions } from './profanity.types';
+import type { ProfanityOptions } from '../config';
+import type { ProfanityFilter, ReplaceAllInput } from './profanity.types';
 
 import { profanityOptionsSchema } from '../config/config.schema';
 import { BAD_WORDS } from './profanity.constants';
@@ -13,7 +14,7 @@ const AFTER = '(?![\\p{L}\\p{N}_])';
 // Stands in for a removed word until the spacing around it is fixed.
 const REMOVED = '\u0000';
 
-export const createProfanityFilter = (options: ProfanityFilterOptions = {}): ProfanityFilter => {
+export const createProfanityFilter = (options: ProfanityOptions = {}): ProfanityFilter => {
   const { additionalBlockWords, excludedWords, placeholder, overrideBlockWords } =
     profanityOptionsSchema.parse(options);
   const excluded = new Set(excludedWords.map((word) => word.toLowerCase()));
@@ -27,7 +28,7 @@ export const createProfanityFilter = (options: ProfanityFilterOptions = {}): Pro
     match: new RegExp(`${BEFORE}${escapeStringRegexp(word)}${AFTER}`, 'giu')
   }));
 
-  const replaceAll = ({ input, replacement }: { input: string; replacement: (found: string) => string }) =>
+  const replaceAll = ({ input, replacement }: ReplaceAllInput) =>
     patterns.reduce((text, { match }) => text.replace(match, replacement), input);
 
   return {

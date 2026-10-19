@@ -1,4 +1,5 @@
 import type { ResolvedConfig } from '../core/config';
+import type { Translations } from '../core/i18n';
 import type { CommitAnswers, CreateMessageResult, MessageData } from '../core/message';
 import type { AnswerError } from '../core/questions';
 import type { LoadConfigInput } from '../io/config-loader';
@@ -21,13 +22,40 @@ export type RunJazzerInput = LoadConfigInput & {
   context?: PromptContext;
 };
 
-export type RunJazzerResult =
-  | Extract<CreateMessageResult, { status: 'blocked' }>
-  | { status: 'cancelled'; /** Ctrl+C rather than "Cancel" in the confirmation. */ interrupted: boolean }
-  | { status: 'ok'; message: string; answers: MessageData; config: ResolvedConfig };
+type BlockedResult = Extract<CreateMessageResult, { status: 'blocked' }>;
+
+type CancelledResult = {
+  status: 'cancelled';
+  /** Ctrl+C, rather than "Cancel" in the confirmation. */
+  interrupted: boolean;
+};
+
+type OkResult = {
+  status: 'ok';
+  message: string;
+  answers: MessageData;
+  config: ResolvedConfig;
+};
+
+export type RunJazzerResult = BlockedResult | CancelledResult | OkResult;
 
 export type ReportErrorInput = {
   error: unknown;
   /** Phrases an answer error for the entry point's users, e.g. with the CLI flag that gave the answer. */
   describe?: (error: AnswerError) => string;
+};
+
+export type ResolvePresetInput = {
+  config: ResolvedConfig;
+  flags: CommitAnswers;
+  alias?: string;
+};
+
+export type ConfirmUntilValidInput = {
+  config: ResolvedConfig;
+  answers: MessageData;
+  /** The generated message, which passed the checks already. */
+  message: string;
+  translations: Translations;
+  context?: PromptContext;
 };

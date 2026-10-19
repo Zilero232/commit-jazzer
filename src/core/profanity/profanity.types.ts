@@ -1,6 +1,7 @@
-import type { ProfanityOptions } from '../config';
-
-export type ProfanityFilterOptions = ProfanityOptions;
+export type ReplaceAllInput = {
+  input: string;
+  replacement: (found: string) => string;
+};
 
 export type ProfanityFilter = {
   /** Blocked words found in the input, in list order, each listed once. */
