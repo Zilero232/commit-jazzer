@@ -52,7 +52,7 @@ $ git commit -m "added stuff"
 commit-jazzer writes messages that pass `@commitlint/config-conventional`, and reads `scope-enum` and the length limits from your commitlint config (see [Configuration](./configuration#taken-from-commitlint)). Its built-in types go beyond the conventional list, so allow them:
 
 ```js
-// commitlint.config.mjs (.mjs: `require('commit-jazzer')` only gives the Commitizen adapter)
+// commitlint.config.mjs or .ts: the CommonJS entry has no BUILT_IN_COMMIT_TYPE_NAMES
 import { BUILT_IN_COMMIT_TYPE_NAMES } from 'commit-jazzer';
 
 export default {
@@ -67,7 +67,7 @@ export default {
 
 ## Releases with semantic-release
 
-Use the `conventionalcommits` preset. `!` and `BREAKING CHANGE:` give a major release, `feat` a minor and `fix` a patch. Other types release nothing unless you add rules. Put `{ breaking: true, release: 'major' }` first: custom rules replace the defaults, so without it `refactor!:` would only be a patch.
+Use the `conventionalcommits` preset. `!` and `BREAKING CHANGE:` give a major release, `feat` a minor and `fix` a patch. Other types release nothing unless you add rules. Add `{ breaking: true, release: 'major' }` too: the defaults apply only to commits no custom rule matches, and `refactor!:` matches the `refactor` rule, so without it it would only be a patch.
 
 ```js
 // release.config.js

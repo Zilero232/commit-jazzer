@@ -152,7 +152,7 @@ Tools parse the header with a pattern like `type(scope)!: subject`. With the emo
 * commitlint with `@commitlint/config-conventional` accepts the message;
 * semantic-release and conventional-changelog read the type, the scope and the breaking change correctly.
 
-An emoji in front of the type (`✨ feat: …`) breaks both. The test suite lints and parses generated messages for every combination of fields to keep this true.
+An emoji in front of the type (`✨ feat: …`) breaks both. The test suite lints and parses a generated message for every built-in type and a set of field combinations to keep this true.
 
 commitlint's `subject-case` rule cannot judge a subject that starts with an emoji. commit-jazzer lower-cases the title itself instead.
 
@@ -259,12 +259,12 @@ The config is checked before the first question. Unknown keys are errors too, so
 
 When the project has a [commitlint](https://commitlint.js.org) config and `@commitlint/load` or `@commitlint/cli` installed, these rules fill the options your config does not set:
 
-| commitlint rule        | Option                                                                  |
-| ---------------------- | ----------------------------------------------------------------------- |
-| `type-enum`            | `availableCommitTypes`: the built-in types it lists                     |
-| `scope-enum`           | `scopes`; as an error (level 2) it also sets `allowCustomScopes: false` |
-| `header-max-length`    | `headerMaxLength`                                                       |
-| `body-max-line-length` | `bodyLineLength`                                                        |
+| commitlint rule        | Option                                                                           |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| `type-enum`            | `availableCommitTypes`: the built-in types it lists; none listed offers them all |
+| `scope-enum`           | `scopes`; as an error (level 2) it also sets `allowCustomScopes: false`          |
+| `header-max-length`    | `headerMaxLength`                                                                |
+| `body-max-line-length` | `bodyLineLength`                                                                 |
 
 Turn it off with `"useCommitlint": false`.
 
@@ -350,7 +350,7 @@ On by default: an answer with a blocked word is rejected while you type. To mask
   "badWordsOptions": {
     "checkHasProfaneWords": false,
     "replaceProfaneWords": true,
-    "options": { "additionalBlockWords": ["foo"], "excludedWords": ["hell"], "placeholder": "#" }
+    "options": { "additionalBlockWords": ["foo"], "excludedWords": ["hell"], "placeholder": "•" }
   }
 }
 ```
@@ -423,7 +423,7 @@ $ git commit -m "added stuff"
 commit-jazzer writes messages that pass `@commitlint/config-conventional`, and reads `scope-enum` and the length limits from your commitlint config (see [Configuration](./configuration#taken-from-commitlint)). Its built-in types go beyond the conventional list, so allow them:
 
 ```js
-// commitlint.config.mjs (.mjs: `require('commit-jazzer')` only gives the Commitizen adapter)
+// commitlint.config.mjs or .ts: the CommonJS entry has no BUILT_IN_COMMIT_TYPE_NAMES
 import { BUILT_IN_COMMIT_TYPE_NAMES } from 'commit-jazzer';
 
 export default {
@@ -438,7 +438,7 @@ export default {
 
 ## Releases with semantic-release
 
-Use the `conventionalcommits` preset. `!` and `BREAKING CHANGE:` give a major release, `feat` a minor and `fix` a patch. Other types release nothing unless you add rules. Put `{ breaking: true, release: 'major' }` first: custom rules replace the defaults, so without it `refactor!:` would only be a patch.
+Use the `conventionalcommits` preset. `!` and `BREAKING CHANGE:` give a major release, `feat` a minor and `fix` a patch. Other types release nothing unless you add rules. Add `{ breaking: true, release: 'major' }` too: the defaults apply only to commits no custom rule matches, and `refactor!:` matches the `refactor` rule, so without it it would only be a patch.
 
 ```js
 // release.config.js
@@ -666,7 +666,7 @@ Each flag answers its question, which is then not asked. An empty value (`--brea
 | `-i, --issues <ids>`  | Related issues, e.g. `"12, 34"`.         |
 | `--comment <text>`    | Extra body paragraph.                    |
 
-Flags are validated like typed answers: an unknown type, a scope outside `scopes` with `allowCustomScopes: false`, a title over the limit, a line break in a header field or parentheses in the scope is an error. So is an answer the template never writes (`--breaking` with a template without `{{breaking}}`), and `--retry` with answers.
+Flags are validated like typed answers: an unknown type, a scope outside `scopes` with `allowCustomScopes: false`, a title over the limit, a line break in a header field or parentheses in the scope is an error. So is an answer the template never writes (`--breaking` with a template without `{{breaking}}`), and `--retry` with answers or an alias.
 
 ### Options
 
@@ -683,7 +683,7 @@ Flags are validated like typed answers: an unknown type, a scope outside `scopes
 | `-h, --help`              | Show the help.                                                                   |
 | `-v, --version`           | Show the version.                                                                |
 
-Everything after `--` goes to `git commit` unchanged, files included:
+Everything after `--` goes to `git commit` unchanged, files included. It works for the commit only: `init`, `hook` and `lint` refuse it, and refuse the commit's options written before them (`jazzer -c x.json lint`); give their own options after the command (`jazzer lint -c x.json`).
 
 ```sh
 jazzer -- -S --author "Jane <jane@example.com>"
@@ -694,7 +694,7 @@ Without a terminal (CI, scripts, pipes) nothing is asked and nothing is guessed 
 
 ## `jazzer :<alias>`
 
-Commits the answers of an [alias](/guide/configuration#frequent-commits) from the config, without questions or confirmation. Answer flags override the alias: `jazzer :deps -i 31`. `--alias <name>` is the same.
+Commits the answers of an [alias](/guide/configuration#frequent-commits) from the config, without questions or confirmation. Answer flags override the alias: `jazzer :deps -i 31`. `--alias <name>` is the same, with or without the colon.
 
 ## `jazzer init`
 
@@ -712,7 +712,7 @@ Hooks go to `.husky/` when husky runs the hooks, and to git's hooks directory ot
 
 ## `jazzer lint [file]`
 
-Checks a commit message against the config: the `type(scope): subject` header, the type, a closed scope list, a non-empty subject, `headerMaxLength`, the blank line after the header and `bodyLineLength` for body lines. Reads `.git/COMMIT_EDITMSG` without a file. git's comment lines (`core.commentChar`) and the diff of `git commit -v` are ignored; merges, reverts, reapplies and `fixup!` commits pass. Exits with 1 when something is wrong.
+Checks a commit message against the config: the `type(scope): subject` header, the type, a closed scope list, a non-empty subject, `headerMaxLength`, the blank line after the header and `bodyLineLength` for body lines. Reads `.git/COMMIT_EDITMSG` without a file. git's comment lines (`core.commentChar`) and the diff of `git commit -v` are ignored; merges, reverts, reapplies and `fixup!` commits pass. Exits with 1 when something is wrong or the file does not exist.
 
 | Option                | Description           |
 | --------------------- | --------------------- |
@@ -783,6 +783,6 @@ The names of the built-in commit types, e.g. for commitlint's `type-enum` (see [
 
 ## `prompter`
 
-The Commitizen adapter. Commitizen finds it by itself through `"path": "commit-jazzer"`; you don't call it. `require('commit-jazzer')` returns only this function.
+The Commitizen adapter. Commitizen finds it by itself through `"path": "commit-jazzer"`; you don't call it. `require('commit-jazzer')` returns `{ prompter, defineConfig }`: the adapter, and `defineConfig` for a CommonJS config.
 
 Anything else (running the questions, formatting or linting a message) goes through the CLI: `jazzer --dry-run` prints a message, `jazzer lint` checks one.

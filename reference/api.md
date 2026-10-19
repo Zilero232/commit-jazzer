@@ -35,6 +35,6 @@ The names of the built-in commit types, e.g. for commitlint's `type-enum` (see [
 
 ## `prompter`
 
-The Commitizen adapter. Commitizen finds it by itself through `"path": "commit-jazzer"`; you don't call it. `require('commit-jazzer')` returns only this function.
+The Commitizen adapter. Commitizen finds it by itself through `"path": "commit-jazzer"`; you don't call it. `require('commit-jazzer')` returns `{ prompter, defineConfig }`: the adapter, and `defineConfig` for a CommonJS config.
 
 Anything else (running the questions, formatting or linting a message) goes through the CLI: `jazzer --dry-run` prints a message, `jazzer lint` checks one.

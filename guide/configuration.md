@@ -60,12 +60,12 @@ The config is checked before the first question. Unknown keys are errors too, so
 
 When the project has a [commitlint](https://commitlint.js.org) config and `@commitlint/load` or `@commitlint/cli` installed, these rules fill the options your config does not set:
 
-| commitlint rule        | Option                                                                  |
-| ---------------------- | ----------------------------------------------------------------------- |
-| `type-enum`            | `availableCommitTypes`: the built-in types it lists                     |
-| `scope-enum`           | `scopes`; as an error (level 2) it also sets `allowCustomScopes: false` |
-| `header-max-length`    | `headerMaxLength`                                                       |
-| `body-max-line-length` | `bodyLineLength`                                                        |
+| commitlint rule        | Option                                                                           |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| `type-enum`            | `availableCommitTypes`: the built-in types it lists; none listed offers them all |
+| `scope-enum`           | `scopes`; as an error (level 2) it also sets `allowCustomScopes: false`          |
+| `header-max-length`    | `headerMaxLength`                                                                |
+| `body-max-line-length` | `bodyLineLength`                                                                 |
 
 Turn it off with `"useCommitlint": false`.
 
@@ -151,7 +151,7 @@ On by default: an answer with a blocked word is rejected while you type. To mask
   "badWordsOptions": {
     "checkHasProfaneWords": false,
     "replaceProfaneWords": true,
-    "options": { "additionalBlockWords": ["foo"], "excludedWords": ["hell"], "placeholder": "#" }
+    "options": { "additionalBlockWords": ["foo"], "excludedWords": ["hell"], "placeholder": "•" }
   }
 }
 ```

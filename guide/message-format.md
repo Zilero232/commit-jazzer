@@ -41,7 +41,7 @@ Tools parse the header with a pattern like `type(scope)!: subject`. With the emo
 * commitlint with `@commitlint/config-conventional` accepts the message;
 * semantic-release and conventional-changelog read the type, the scope and the breaking change correctly.
 
-An emoji in front of the type (`✨ feat: …`) breaks both. The test suite lints and parses generated messages for every combination of fields to keep this true.
+An emoji in front of the type (`✨ feat: …`) breaks both. The test suite lints and parses a generated message for every built-in type and a set of field combinations to keep this true.
 
 commitlint's `subject-case` rule cannot judge a subject that starts with an emoji. commit-jazzer lower-cases the title itself instead.
 

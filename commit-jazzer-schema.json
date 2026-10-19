@@ -466,7 +466,7 @@
             },
             "placeholder": {
               "default": "*",
-              "description": "Character a blocked word is masked with.",
+              "description": "Character a blocked word is masked with; not \"#\".",
               "type": "string",
               "minLength": 1
             },
