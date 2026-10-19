@@ -76,6 +76,33 @@ describe('runCli', () => {
     expect(runCommit).toHaveBeenCalledWith(expect.objectContaining({ gitArgs: ['-S', '--', 'src/a.ts'] }));
   });
 
+  it('refuses options of jazzer before a command, which would be ignored', async () => {
+    expect(await run('-c', 'x.json', 'lint')).toBe(1);
+    expect(output.stderr()).toContain('the options of jazzer do not apply to "lint"');
+    expect(runLint).not.toHaveBeenCalled();
+  });
+
+  it('refuses "--" for a command, which passes nothing to git', async () => {
+    expect(await run('lint', '--', 'msg.txt')).toBe(1);
+    expect(output.stderr()).toContain('"lint" takes none');
+    expect(runLint).not.toHaveBeenCalled();
+  });
+
+  it('refuses --retry with answers or an alias', async () => {
+    expect(await run('-r', '-t', 'fix')).toBe(1);
+    expect(await run('-r', ':deps')).toBe(1);
+    expect(output.stderr()).toContain("option '-r, --retry' cannot be used with option '-t, --type <type>'");
+    expect(output.stderr()).toContain('it takes no answers and no alias');
+    expect(runCommit).not.toHaveBeenCalled();
+  });
+
+  it('reads --alias with or without the colon', async () => {
+    await run('--alias', ':deps');
+    await run('--alias', 'deps');
+
+    expect(vi.mocked(runCommit).mock.calls.map(([options]) => options.alias)).toEqual(['deps', 'deps']);
+  });
+
   it('keeps flag values as strings', async () => {
     await run('-i', '31', '-m', '-fix');
 

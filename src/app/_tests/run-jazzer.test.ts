@@ -116,6 +116,24 @@ describe('runJazzer', () => {
     });
   });
 
+  it('does not blame the alias for an answer it did not give', async () => {
+    const { AnswerError } = await import('../../core/questions');
+
+    // The alias has no issues; this one came from the branch name.
+    vi.mocked(askQuestions).mockRejectedValueOnce(
+      new AnswerError({ code: 'invalid', field: 'issues', reason: 'Too long' })
+    );
+
+    await expect(runJazzer({ interactive: true, alias: 'deps' })).rejects.toMatchObject({ reason: 'Too long' });
+  });
+
+  it('cancels when the edited message is left empty', async () => {
+    vi.mocked(loadConfig).mockResolvedValueOnce({ config: resolvedConfig({ template: '{{title}}' }) });
+    vi.mocked(confirmMessage).mockResolvedValueOnce('# only a comment');
+
+    expect(await runJazzer({ interactive: true })).toEqual({ status: 'cancelled', interrupted: false });
+  });
+
   it('gives the questions a profanity check and the questions that are not asked', async () => {
     await runJazzer({ interactive: true });
 

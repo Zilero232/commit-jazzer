@@ -1,3 +1,5 @@
+import { isNullish, omitBy } from 'remeda';
+
 import type { CommitAnswers } from '../message';
 import type { InferFromBranchInput } from './questions.types';
 
@@ -16,11 +18,8 @@ const ISSUE_NUMBER = /^(?:[\w-]+\/)?(\d+)(?:[-_](?=[a-z])|$)/i;
 export const inferFromBranch = ({ branch, commitTypes }: InferFromBranchInput): CommitAnswers => {
   const prefix = branch.includes('/') ? (branch.split('/', 1)[0] ?? '').toLowerCase() : '';
   const wanted = BRANCH_TYPE_ALIASES[prefix] ?? prefix;
-  const type = commitTypes.find(({ name }) => name === wanted)?.name;
-  const issue = TRACKER_KEY.exec(branch)?.[1] ?? ISSUE_NUMBER.exec(branch)?.[1];
+  const type = commitTypes.some(({ name }) => name === wanted) ? wanted : undefined;
+  const issues = TRACKER_KEY.exec(branch)?.[1] ?? ISSUE_NUMBER.exec(branch)?.[1];
 
-  return {
-    ...(type ? { type } : {}),
-    ...(issue ? { issues: issue } : {})
-  };
+  return omitBy({ type, issues }, isNullish);
 };

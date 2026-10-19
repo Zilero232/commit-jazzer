@@ -7,7 +7,9 @@ export type InitContext = {
   inRepository: boolean;
 };
 
-export type HookInput = InitContext & {
+export type InstallHookInput = {
+  /** Where the hook goes: git's hooks directory or `.husky/`. */
+  hooksDir: string;
   name: HookName;
 };
 

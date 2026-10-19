@@ -13,7 +13,9 @@ export default defineConfig({
     'commitizen',
     'deps',
     'release',
-    'docs'
+    'docs',
+    // `docs(readme):` releases a patch, so npm shows the new README.
+    'readme'
   ],
   availableCommitTypes: [
     'feat',
@@ -25,6 +27,8 @@ export default defineConfig({
     'test',
     'build',
     'ci',
+    'security',
+    'downgrade',
     'upgrade',
     'remove',
     'revert'

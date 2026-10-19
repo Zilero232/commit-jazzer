@@ -39,6 +39,7 @@ export const createProfanityFilter = (options: ProfanityOptions = {}): Profanity
     // two words, none at the end of a line or next to punctuation, and the indentation of a line is kept.
     clean: (input) =>
       replaceAll({ input, replacement: () => REMOVED }).replace(
+        // A run of REMOVED marks (`\0`) with the spaces before and after it.
         /([ \t]*)\0(?:[ \t]*\0)*([ \t]*)/g,
         (_, before: string, after: string, offset: number, text: string) => {
           const atLineStart = offset === 0 || text[offset - 1] === '\n';

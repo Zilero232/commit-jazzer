@@ -30,7 +30,7 @@ const askSearch = async <Value>({
       source,
       validate,
       pageSize: SEARCH_PAGE_SIZE,
-      ...(isDefined(suggested) ? { default: suggested } : {})
+      default: suggested
     },
     context
   );

@@ -14,7 +14,7 @@ env:
   HUSKY: 0
 
 concurrency:
-  # The release workflow passes its own group; on a pull request the newest push wins.
+  # On a pull request the newest push wins; called from release.yml (no PR number) every run has its own group.
   group: ci-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
@@ -72,10 +72,14 @@ jobs:
           name: dist
           path: dist
 
-      # The published CLI on this Node version, without a terminal: every required answer comes from a flag.
-      - name: Smoke test the built CLI
+      # The published files on this Node version, in an empty repository so neither the repo's own config nor its
+      # sources are involved. Without a terminal every required answer comes from a flag.
+      - name: Smoke test the built package
         run: |
-          node dist/cli.mjs --version
-          node dist/cli.mjs --dry-run -t feat -s ci -m "smoke test" -i 7 | tee message.txt
+          package="$PWD"
+          cd "$(mktemp -d)" && git init -q
+          node "$package/dist/cli.mjs" --version
+          node "$package/dist/cli.mjs" --dry-run -t feat -s ci -m "smoke test" -i 7 | tee message.txt
           printf 'feat(ci): ✨ smoke test\n\nCloses #7\n' | diff - message.txt
-          node -e "require('./index.cjs').prompter.constructor.name === 'AsyncFunction' || process.exit(1)"
+          node -e "import('$package/dist/index.mjs').then((m) => typeof m.prompter === 'function' || process.exit(1))"
+          node -e "typeof require('$package/index.cjs').defineConfig === 'function' || process.exit(1)"

@@ -41,3 +41,14 @@ export type FoundInput = {
 export type LoadCommitlintRulesInput = {
   cwd: string;
 };
+
+export type DisplayPathInput = {
+  cwd: string;
+  path: string;
+};
+
+export type TryResolveInput = {
+  /** A `require` bound to the place to resolve from. */
+  from: NodeJS.Require;
+  id: string;
+};

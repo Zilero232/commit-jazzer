@@ -15,6 +15,10 @@ const FIELD_VARIABLES: Record<CommitField, readonly string[]> = {
 
 /** The fields a template writes into the message: `{{type}}: {{title}}` writes only those two. */
 export const templateFields = (template: string): Set<CommitField> => {
-  const variables = new Set([...template.matchAll(/\{\{[#/^]?\s*(?:if\s+|unless\s+)?(\w+)/g)].map(([, name]) => name));
+  // `{{title}}`, `{{~title~}}`, `{{#if breaking}}`, `{{#each issues}}`: the first name inside the braces.
+  const variables = new Set(
+    [...template.matchAll(/\{\{~?\s*(?:[#/^]\s*)?(?:(?:if|unless|with|each)\s+)?(\w+)/g)].map(([, name]) => name)
+  );
+
   return new Set(COMMIT_FIELDS.filter((field) => FIELD_VARIABLES[field].some((name) => variables.has(name))));
 };

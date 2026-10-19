@@ -1,6 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, onTestFinished } from 'vitest';
 
 import { captureOutput, createTempDir, useTempRepo } from '../../shared/testing/helpers';
 import { runLint } from '../commands/lint/run-lint';
@@ -29,6 +29,11 @@ describe('runLint', () => {
     expect(output.stderr()).toContain('The first line must look like "type(scope): subject"');
   });
 
+  it('explains a missing message file instead of failing with ENOENT', async () => {
+    expect(await runLint({ cwd: repo().path })).toBe(1);
+    expect(output.stderr()).toContain('No commit message at');
+  });
+
   it('follows the config of the repository', async () => {
     await writeFile(join(repo().path, '.jazzerrc'), JSON.stringify({ scopes: ['api'], allowCustomScopes: false }));
 
@@ -44,8 +49,8 @@ describe('runLint', () => {
 
   it('needs a file outside a repository', async () => {
     const plain = await createTempDir();
+    onTestFinished(plain.remove);
 
     expect(await runLint({ cwd: plain.path })).toBe(1);
-    await plain.remove();
   });
 });

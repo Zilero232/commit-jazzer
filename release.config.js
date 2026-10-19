@@ -26,8 +26,8 @@ const COMMIT_TYPES = [
 ];
 
 const RELEASE_RULES = [
-  // A commit gets the biggest release among the rules it matches. Our rules replace the analyzer's defaults,
-  // so the breaking-change rule must be here too.
+  // A commit gets the biggest release among the rules it matches. The analyzer's own defaults apply only to a
+  // commit no rule matches, and `refactor!:` matches the refactor rule: so the breaking-change rule is ours too.
   { breaking: true, release: 'major' },
   { type: 'docs', scope: 'readme', release: 'patch' },
   ...COMMIT_TYPES.filter(({ release }) => release).map(({ type, release }) => ({ type, release }))

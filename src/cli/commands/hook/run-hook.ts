@@ -4,6 +4,7 @@ import { isDefined } from 'remeda';
 import type { RunHookInput } from './hook.types';
 
 import { exitCodeOf, reportResult, runJazzer } from '../../../app';
+import { getCommentChar } from '../../../io/git';
 import { logger } from '../../../io/logger';
 import { isTerminalInput, openTerminal } from '../../../io/terminal';
 import { MESSAGES } from '../../../shared/messages';
@@ -36,9 +37,11 @@ export const runHook = async ({ file, source, configPath, open = openTerminal }:
       return exitCodeOf(result);
     }
 
-    // git strips `#` lines once the editor closes: its own comments below the message, and any of ours.
-    if (message.split('\n').some((line) => line.startsWith('#'))) {
-      logger.warn(MESSAGES.hook.commentLines);
+    // git strips comment lines once the editor closes: its own below the message, and any of ours.
+    const commentChar = await getCommentChar();
+
+    if (message.split('\n').some((line) => line.startsWith(commentChar))) {
+      logger.warn(MESSAGES.hook.commentLines(commentChar));
     }
 
     const existing = await readFile(file, 'utf8').catch(() => '');

@@ -3,24 +3,28 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { isPlainObject } from 'remeda';
 
-import type { LoadCommitlintRulesInput } from './config-loader.types';
+import type { LoadCommitlintRulesInput, TryResolveInput } from './config-loader.types';
 
 import { MESSAGES } from '../../shared/messages';
 import { logger } from '../logger';
 
+const tryResolve = ({ from, id }: TryResolveInput): string | undefined => {
+  try {
+    return from.resolve(id);
+  } catch {
+    return undefined;
+  }
+};
+
 // `@commitlint/load` straight from the project, or through `@commitlint/cli`, where pnpm keeps it.
 const resolveLoad = (cwd: string): string | undefined => {
   const project = createRequire(join(cwd, 'package.json'));
+  const cli = tryResolve({ from: project, id: '@commitlint/cli' });
 
-  for (const resolveFrom of [() => project, () => createRequire(project.resolve('@commitlint/cli'))]) {
-    try {
-      return resolveFrom().resolve('@commitlint/load');
-    } catch {
-      // Try the next place.
-    }
-  }
-
-  return undefined;
+  return (
+    tryResolve({ from: project, id: '@commitlint/load' }) ??
+    (cli ? tryResolve({ from: createRequire(cli), id: '@commitlint/load' }) : undefined)
+  );
 };
 
 /**

@@ -57,7 +57,13 @@ export const profanityOptionsSchema = z
   .strictObject({
     additionalBlockWords: z.array(z.string().min(1)).default([]).meta({ description: 'Extra words to block.' }),
     excludedWords: z.array(z.string()).default([]).meta({ description: 'Words that are never blocked.' }),
-    placeholder: z.string().min(1).default('*').meta({ description: 'Character a blocked word is masked with.' }),
+    placeholder: z
+      .string()
+      .min(1)
+      // git drops a line starting with "#" as a comment, and a masked word may start one.
+      .refine((placeholder) => !placeholder.startsWith('#'), { message: MESSAGES.config.placeholderComment })
+      .default('*')
+      .meta({ description: 'Character a blocked word is masked with; not "#".' }),
     overrideBlockWords: z
       .boolean()
       .default(false)
@@ -219,6 +225,17 @@ export const configSchema = z
           message: MESSAGES.config.typeName(name)
         });
       });
+
+    // `availablePromptQuestions` guarantees type and title are asked; an override must not take that back.
+    config.baseQuestionsOptions.forEach(({ key, options }, index) => {
+      if ((key === 'type' || key === 'title') && (options?.skip || options?.required === false)) {
+        context.addIssue({
+          code: 'custom',
+          path: ['baseQuestionsOptions', index, 'options'],
+          message: MESSAGES.config.requiredQuestion(key)
+        });
+      }
+    });
 
     Object.entries(config.aliases).forEach(([name, alias]) => {
       if (!types.has(alias.type)) {

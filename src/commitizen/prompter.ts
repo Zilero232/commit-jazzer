@@ -1,8 +1,8 @@
 import { isDefined } from 'remeda';
 
-import { exitCodeOf, reportError, reportResult, runJazzer } from '../app';
+import type { CommitizenCommit } from './commitizen.types';
 
-export type CommitizenCommit = (message: string) => void;
+import { exitCodeOf, reportError, reportResult, runJazzer } from '../app';
 
 /**
  * Commitizen adapter entry point, used by `git cz`.

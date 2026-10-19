@@ -26,6 +26,14 @@ describe('templateFields', () => {
     ]);
   });
 
+  it('reads variables with whitespace control and #each blocks', () => {
+    expect([...templateFields('{{~type~}}: {{~ title}}{{#each issues}}x{{/each}}')].sort()).toEqual([
+      'issues',
+      'title',
+      'type'
+    ]);
+  });
+
   it('leaves out what the 1.x template does not write', () => {
     expect([...templateFields('{{type}}: {{emoji}} - {{title}}')].sort()).toEqual(['title', 'type']);
   });

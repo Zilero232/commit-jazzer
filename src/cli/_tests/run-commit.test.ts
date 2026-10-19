@@ -1,6 +1,6 @@
 import { chmod, mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, onTestFinished } from 'vitest';
 
 import type { CommitOptions } from '../cli.types';
 
@@ -120,9 +120,9 @@ describe('runCommit', () => {
 
   it('fails outside a git repository', async () => {
     const plain = await createTempDir();
+    onTestFinished(plain.remove);
 
     expect(await runCommit(options({ cwd: plain.path }))).toBe(1);
     expect(output.stderr()).toContain('Not inside a git repository');
-    await plain.remove();
   });
 });

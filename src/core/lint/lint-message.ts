@@ -9,7 +9,10 @@ import { HEADER, SKIPPED } from './lint.constants';
 
 /**
  * Keeps what git will commit: drops the diff `git commit -v` adds under the scissors line, and the comment
- * lines git writes (the comment character followed by a space, or alone). `#WIP` is text, not a comment.
+ * lines git writes (the comment character followed by a space, or alone).
+ *
+ * A line such as `#WIP` stays. git keeps it in `git commit -m` and drops it only when an editor opens,
+ * and a commit-msg hook cannot tell which of the two it runs after.
  */
 export const stripComments = ({ message, commentChar = '#' }: StripCommentsInput): string => {
   const lines = message.replaceAll('\r\n', '\n').split('\n');
@@ -81,4 +84,4 @@ export const lintMessage = ({ message, config, commentChar }: LintMessageInput):
 };
 
 /** Whether the template starts with the Conventional Commits header (`{{type}}…`), the format `lintMessage` checks. */
-export const isConventionalTemplate = (template: string): boolean => /^\s*\{\{\s*type\s*\}\}/.test(template);
+export const isConventionalTemplate = (template: string): boolean => /^\s*\{\{~?\s*type\s*~?\}\}/.test(template);

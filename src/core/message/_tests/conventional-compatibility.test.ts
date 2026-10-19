@@ -38,7 +38,7 @@ describe('generated messages', () => {
   const settings = resolvedConfig();
 
   describe.each(Object.entries(CASES))('%s', (_, answers) => {
-    describe.each(DEFAULT_COMMIT_TYPES.filter(({ name }) => /^[a-z]+$/.test(name)).slice(0, 12))('$name', (type) => {
+    describe.each(DEFAULT_COMMIT_TYPES)('$name', (type) => {
       const message = formatMessage({
         data: { ...answers, type: type.name, emoji: type.emoji, code: type.code },
         config: settings

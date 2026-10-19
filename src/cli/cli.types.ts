@@ -68,3 +68,15 @@ export type ReportInput = {
   /** The answers given as flags, to name the flag in an error about one. */
   preset?: CommitAnswers;
 };
+
+export type RunCommandInput = {
+  /** Runs the command and resolves with its exit code. */
+  command: () => Promise<number>;
+  /** The answers given as flags, to name the flag in an error about one. */
+  preset?: CommitAnswers;
+};
+
+export type ParseCommitOptionsInput = ToCommitOptionsInput & {
+  /** The command being run: it prints an argument error the way commander does and exits. */
+  command: { error: (message: string) => never };
+};

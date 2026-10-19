@@ -1,6 +1,7 @@
 import { openSync } from 'node:fs';
 import { Writable } from 'node:stream';
 import { isatty, ReadStream, WriteStream as TtyWriteStream } from 'node:tty';
+import { isFunction } from 'remeda';
 
 import type { Terminal } from './terminal.types';
 
@@ -8,15 +9,13 @@ import type { Terminal } from './terminal.types';
 export const isTerminalInput = (input: unknown): boolean =>
   input instanceof ReadStream ? input.isTTY : input === process.stdin && isatty(0);
 
-const isCallback = (value: unknown): value is () => void => typeof value === 'function';
-
 // A stream whose end() is ignored: every prompt "ends" it, the next one writes to it again.
 class OpenEndedStream extends Writable {
   override end(...args: unknown[]): this {
     // end(callback), end(chunk, callback) and end(chunk, encoding, callback): the callback is always last.
     const done = args.at(-1);
 
-    if (isCallback(done)) {
+    if (isFunction(done)) {
       queueMicrotask(done);
     }
 
@@ -48,8 +47,15 @@ export const keepOpen = (tty: Pick<TtyWriteStream, 'columns' | 'isTTY' | 'rows' 
  * sits at one. `undefined` when there is none: an IDE, a GUI client, Windows outside a terminal.
  */
 export const openTerminal = (): Terminal | undefined => {
+  let input: ReadStream;
+
   try {
-    const input = new ReadStream(openSync('/dev/tty', 'r'));
+    input = new ReadStream(openSync('/dev/tty', 'r'));
+  } catch {
+    return undefined;
+  }
+
+  try {
     const tty = new TtyWriteStream(openSync('/dev/tty', 'w'));
 
     return {
@@ -61,6 +67,9 @@ export const openTerminal = (): Terminal | undefined => {
       }
     };
   } catch {
+    // Readable but not writable: close the side that did open.
+    input.destroy();
+
     return undefined;
   }
 };

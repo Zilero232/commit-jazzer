@@ -20,7 +20,7 @@ Each flag answers its question, which is then not asked. An empty value (`--brea
 | `-i, --issues <ids>`  | Related issues, e.g. `"12, 34"`.         |
 | `--comment <text>`    | Extra body paragraph.                    |
 
-Flags are validated like typed answers: an unknown type, a scope outside `scopes` with `allowCustomScopes: false`, a title over the limit, a line break in a header field or parentheses in the scope is an error. So is an answer the template never writes (`--breaking` with a template without `{{breaking}}`), and `--retry` with answers.
+Flags are validated like typed answers: an unknown type, a scope outside `scopes` with `allowCustomScopes: false`, a title over the limit, a line break in a header field or parentheses in the scope is an error. So is an answer the template never writes (`--breaking` with a template without `{{breaking}}`), and `--retry` with answers or an alias.
 
 ### Options
 
@@ -37,7 +37,7 @@ Flags are validated like typed answers: an unknown type, a scope outside `scopes
 | `-h, --help`              | Show the help.                                                                   |
 | `-v, --version`           | Show the version.                                                                |
 
-Everything after `--` goes to `git commit` unchanged, files included:
+Everything after `--` goes to `git commit` unchanged, files included. It works for the commit only: `init`, `hook` and `lint` refuse it, and refuse the commit's options written before them (`jazzer -c x.json lint`); give their own options after the command (`jazzer lint -c x.json`).
 
 ```sh
 jazzer -- -S --author "Jane <jane@example.com>"
@@ -48,7 +48,7 @@ Without a terminal (CI, scripts, pipes) nothing is asked and nothing is guessed 
 
 ## `jazzer :<alias>`
 
-Commits the answers of an [alias](/guide/configuration#frequent-commits) from the config, without questions or confirmation. Answer flags override the alias: `jazzer :deps -i 31`. `--alias <name>` is the same.
+Commits the answers of an [alias](/guide/configuration#frequent-commits) from the config, without questions or confirmation. Answer flags override the alias: `jazzer :deps -i 31`. `--alias <name>` is the same, with or without the colon.
 
 ## `jazzer init`
 
@@ -66,7 +66,7 @@ Hooks go to `.husky/` when husky runs the hooks, and to git's hooks directory ot
 
 ## `jazzer lint [file]`
 
-Checks a commit message against the config: the `type(scope): subject` header, the type, a closed scope list, a non-empty subject, `headerMaxLength`, the blank line after the header and `bodyLineLength` for body lines. Reads `.git/COMMIT_EDITMSG` without a file. git's comment lines (`core.commentChar`) and the diff of `git commit -v` are ignored; merges, reverts, reapplies and `fixup!` commits pass. Exits with 1 when something is wrong.
+Checks a commit message against the config: the `type(scope): subject` header, the type, a closed scope list, a non-empty subject, `headerMaxLength`, the blank line after the header and `bodyLineLength` for body lines. Reads `.git/COMMIT_EDITMSG` without a file. git's comment lines (`core.commentChar`) and the diff of `git commit -v` are ignored; merges, reverts, reapplies and `fixup!` commits pass. Exits with 1 when something is wrong or the file does not exist.
 
 | Option                | Description           |
 | --------------------- | --------------------- |

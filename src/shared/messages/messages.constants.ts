@@ -25,7 +25,10 @@ export const MESSAGES = {
     unknownCommand: (name: string) =>
       `unknown command '${name}'. Commands: init, hook, lint; aliases are written :${name}`,
     aliasTwice: ({ positional, flag }: AliasTwiceInput) => `give the alias once: ${positional} or --alias ${flag}`,
-    retryWithAnswers: '--retry commits the saved message as it is; it takes no answers',
+    retryWithAnswers: '--retry commits the saved message as it is; it takes no answers and no alias',
+    optionsBeforeCommand: (command: string) =>
+      `the options of jazzer do not apply to "${command}": write them after it, e.g. jazzer ${command} -c <path>`,
+    passthroughWithCommand: (command: string) => `"--" passes arguments to git commit; "${command}" takes none`,
     missingFlag: (flag: string) => `Missing answer for ${flag}: there is no terminal to ask in.`
   },
   answer: {
@@ -45,7 +48,7 @@ export const MESSAGES = {
     failed: 'git commit failed. Fix the problem and run `jazzer --retry` to commit the same message.'
   },
   hook: {
-    commentLines: 'Lines starting with "#" will be removed by git as comments.'
+    commentLines: (commentChar: string) => `Lines starting with "${commentChar}" will be removed by git as comments.`
   },
   init: {
     created: (path: string) => `Created ${path}`,
@@ -64,6 +67,8 @@ export const MESSAGES = {
   },
   lint: {
     notInRepository: 'Not inside a git repository: pass the message file, e.g. jazzer lint .git/COMMIT_EDITMSG',
+    noFile: (path: string) =>
+      `No commit message at ${path}: pass the message file, e.g. jazzer lint .git/COMMIT_EDITMSG`,
     hint: 'Write the message with `jazzer`, or fix it and commit again.',
     header: (header: string) => `The first line must look like "type(scope): subject", got "${header}"`,
     unknownType: ({ value, allowed }: OneOfInput) => `Unknown type "${value}". Use one of: ${allowed.join(', ')}`,
@@ -82,6 +87,8 @@ export const MESSAGES = {
     noField: ({ path, field }: NoFieldInput) => `${path} has no "${field}" field.`,
     commitlintSkipped: (reason: string) => `Skipping the commitlint config: ${reason}`,
     requiredQuestions: 'Must include "type" and "title": a commit message needs both',
+    requiredQuestion: (key: string) => `"${key}" cannot be skipped or optional: a commit message needs it`,
+    placeholderComment: 'Must not start with "#": git would drop a line that starts with a masked word',
     typeName: (name: string) =>
       `"${name}": use letters, digits or "_"; Conventional Commits parsers read no "-" in a type`,
     unknownAliasType: (type: string) => `"${type}" is not an available commit type`,

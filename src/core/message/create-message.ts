@@ -36,7 +36,7 @@ export const createMessage = ({ config, answers, message: given }: CreateMessage
     const cleaned = mapValues(answers, (value) => value && filter.clean(value));
 
     if (!cleaned.title?.trim()) {
-      return { status: 'blocked', profaneWords: filter.findProfaneWords(message), reason };
+      return { status: 'blocked', profaneWords: found, reason };
     }
 
     return { status: 'ok', message: formatMessage({ data: cleaned, config }) };

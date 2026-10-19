@@ -1,14 +1,17 @@
-import { Command } from '@commander-js/extra-typings';
-import { isDefined } from 'remeda';
+import { Command, Option } from '@commander-js/extra-typings';
+import { isDefined, isEmpty } from 'remeda';
 
 import type { CommitAnswers } from '../core/message';
 import type { AnswerError } from '../core/questions';
-import type { CreateProgramInput, ReportInput } from './cli.types';
+import type { CreateProgramInput, ParseCommitOptionsInput, ReportInput, RunCommandInput } from './cli.types';
 
 import { version } from '../../package.json';
 import { MESSAGES } from '../shared/messages';
 import { FIELD_FLAGS, HELP_FOOTER } from './cli.constants';
-import { toCommitOptions } from './to-commit-options';
+import { CommitArgsError, toCommitOptions } from './to-commit-options';
+
+// Answers given as flags: `--retry` commits a saved message and takes none of them.
+const ANSWER_OPTIONS = ['type', 'scope', 'title', 'body', 'breaking', 'issues', 'comment', 'alias'];
 
 // The root command alone: `CommitFlags` is inferred from it.
 export const createCommitCommand = () =>
@@ -25,7 +28,7 @@ export const createCommitCommand = () =>
     .option('--alias <name>', 'same as :name')
     .option('-y, --yes', 'no confirmation; only required questions without a flag are asked')
     .option('-n, --dry-run', 'print the message instead of committing')
-    .option('-r, --retry', 'commit the last message again, without questions')
+    .addOption(new Option('-r, --retry', 'commit the last message again, without questions').conflicts(ANSWER_OPTIONS))
     .option('-c, --config <path>', 'config file to use instead of searching (also JAZZER_CONFIG)')
     .option('--banner', 'show the banner')
     .option('--no-banner', 'hide the banner')
@@ -44,6 +47,19 @@ const describeAnswerError = (preset: CommitAnswers) => (error: AnswerError) => {
   return isDefined(preset[error.field]) ? `${flag}: ${error.reason}` : error.message;
 };
 
+// Flags that contradict each other are printed like commander's own argument errors, with the hint to --help.
+const parseCommitOptions = ({ command, ...input }: ParseCommitOptionsInput) => {
+  try {
+    return toCommitOptions(input);
+  } catch (error) {
+    if (error instanceof CommitArgsError) {
+      command.error(`error: ${error.message}`);
+    }
+
+    throw error;
+  }
+};
+
 const report = async ({ error, preset = {} }: ReportInput) =>
   (await import('../app')).reportError({ error, describe: describeAnswerError(preset) });
 
@@ -52,6 +68,11 @@ const report = async ({ error, preset = {} }: ReportInput) =>
  * Each command loads its code on use, so `--help` and `--version` stay fast.
  */
 export const createProgram = ({ cwd, passthrough, exit }: CreateProgramInput) => {
+  // Runs a command and hands its exit code on; an error is reported and exits with 1.
+  const run = async ({ command, preset }: RunCommandInput) => {
+    exit(await command().catch((error: unknown) => report({ error, preset })));
+  };
+
   const program = createCommitCommand()
     .version(version, '-v, --version')
     .addHelpText('after', HELP_FOOTER)
@@ -59,11 +80,25 @@ export const createProgram = ({ cwd, passthrough, exit }: CreateProgramInput) =>
     .exitOverride()
     // `jazzer hook MSG -c x.json`: options after a subcommand are that subcommand's, `-c` included.
     .enablePositionalOptions()
-    .action(async (alias, flags) => {
-      const options = toCommitOptions({ alias, flags, passthrough, cwd });
-      const { runCommit } = await import('./commands/commit/run-commit');
+    // ...so `jazzer -c x.json lint` or `jazzer lint -- msg` would be ignored without a word: refuse them.
+    .hook('preSubcommand', (root, subcommand) => {
+      const given = root.options.filter((option) => root.getOptionValueSource(option.attributeName()) === 'cli');
 
-      exit(await runCommit(options).catch((error: unknown) => report({ error, preset: options.preset })));
+      if (!isEmpty(given)) {
+        root.error(`error: ${MESSAGES.cli.optionsBeforeCommand(subcommand.name())}`);
+      }
+
+      if (!isEmpty(passthrough)) {
+        root.error(`error: ${MESSAGES.cli.passthroughWithCommand(subcommand.name())}`);
+      }
+    })
+    .action(async (alias, flags, command) => {
+      const options = parseCommitOptions({ command, alias, flags, passthrough, cwd });
+
+      await run({
+        command: async () => (await import('./commands/commit/run-commit')).runCommit(options),
+        preset: options.preset
+      });
     });
 
   program
@@ -72,12 +107,15 @@ export const createProgram = ({ cwd, passthrough, exit }: CreateProgramInput) =>
     .option('--ts', 'write jazzer.config.ts instead of jazzer.config.json')
     .option('--hook', 'install the prepare-commit-msg hook: the questions on git commit')
     .option('--lint', 'install the commit-msg hook: check messages written with git commit -m')
-    .option('--remove-hook', 'remove the hooks init installed')
+    .addOption(
+      new Option('--remove-hook', 'remove the hooks init installed').conflicts(['ts', 'hook', 'lint', 'force'])
+    )
     .option('-f, --force', 'replace an existing jazzer.config.json or .ts')
     .action(async ({ ts = false, hook = false, lint = false, removeHook = false, force = false }) => {
-      const { runInit } = await import('./commands/init/run-init');
-
-      exit(await runInit({ ts, hook, lint, removeHook, force, cwd }).catch((error: unknown) => report({ error })));
+      await run({
+        command: async () =>
+          (await import('./commands/init/run-init')).runInit({ ts, hook, lint, removeHook, force, cwd })
+      });
     });
 
   program
@@ -87,9 +125,9 @@ export const createProgram = ({ cwd, passthrough, exit }: CreateProgramInput) =>
     .argument('[source]', 'what the message comes from: the hook\'s "$2"')
     .option('-c, --config <path>', 'config file to use')
     .action(async (file, source, { config }) => {
-      const { runHook } = await import('./commands/hook/run-hook');
-
-      exit(await runHook({ file, source, configPath: config }).catch((error: unknown) => report({ error })));
+      await run({
+        command: async () => (await import('./commands/hook/run-hook')).runHook({ file, source, configPath: config })
+      });
     });
 
   program
@@ -98,9 +136,9 @@ export const createProgram = ({ cwd, passthrough, exit }: CreateProgramInput) =>
     .argument('[file]', 'the message file (default: .git/COMMIT_EDITMSG)')
     .option('-c, --config <path>', 'config file to use')
     .action(async (file, { config }) => {
-      const { runLint } = await import('./commands/lint/run-lint');
-
-      exit(await runLint({ file, configPath: config, cwd }).catch((error: unknown) => report({ error })));
+      await run({
+        command: async () => (await import('./commands/lint/run-lint')).runLint({ file, configPath: config, cwd })
+      });
     });
 
   return program;

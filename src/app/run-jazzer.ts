@@ -42,7 +42,11 @@ export const runJazzer = async (input: RunJazzerInput = {}): Promise<RunJazzerRe
   // Rejecting a blocked word while it is typed beats rejecting the finished message.
   const checkWhileTyping = config.validateCommitBadWords && badWordsOptions.checkHasProfaneWords;
   const questions = buildQuestions({ config, translations });
-  const commitTypes = questions.flatMap((question) => (question.kind === 'type' ? question.commitTypes : []));
+  const commitTypes = questions.find((question) => question.kind === 'type')?.commitTypes ?? [];
+  // Flags may answer questions that are not asked; these hold such answers to the same rules.
+  const extraQuestions = buildQuestions({ config, translations, keys: COMMIT_FIELDS }).flatMap((question) =>
+    question.kind === 'text' ? [question] : []
+  );
   const branch = policy.useBranch ? await getCurrentBranch({ cwd }) : undefined;
 
   try {
@@ -52,9 +56,7 @@ export const runJazzer = async (input: RunJazzerInput = {}): Promise<RunJazzerRe
       ask: policy.ask,
       preset,
       defaults: branch ? inferFromBranch({ branch, commitTypes }) : {},
-      extraQuestions: buildQuestions({ config, translations, keys: COMMIT_FIELDS }).flatMap((question) =>
-        question.kind === 'text' ? [question] : []
-      ),
+      extraQuestions,
       limitLength: createLengthLimit({ config, questions }),
       findProfaneWords: checkWhileTyping ? createProfanityFilter(badWordsOptions.options).findProfaneWords : undefined,
       context
@@ -76,13 +78,20 @@ export const runJazzer = async (input: RunJazzerInput = {}): Promise<RunJazzerRe
       return { status: 'cancelled', interrupted: true };
     }
 
-    // An alias names itself in the error: the user typed no flag for its answers.
-    if (error instanceof AnswerError && isDefined(alias) && !isDefined(flags[error.field])) {
-      throw new AnswerError({
-        code: error.code,
-        field: error.field,
-        reason: MESSAGES.answer.inAlias({ reason: error.reason, alias })
-      });
+    if (error instanceof AnswerError && isDefined(alias)) {
+      // The alias names itself when the answer is its own, or a required one it leaves out.
+      // An answer from a flag or guessed from the branch is not the alias's fault.
+      const { field } = error;
+      const isAliasAnswer =
+        !isDefined(flags[field]) && (error.code === 'missing' || isDefined(config.aliases[alias]?.[field]));
+
+      if (isAliasAnswer) {
+        throw new AnswerError({
+          code: error.code,
+          field,
+          reason: MESSAGES.answer.inAlias({ reason: error.reason, alias })
+        });
+      }
     }
 
     throw error;

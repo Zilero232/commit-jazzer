@@ -1,4 +1,4 @@
-import { isDefined, isEmpty, isNullish, isTruthy, omitBy } from 'remeda';
+import { isDefined, isNullish, isTruthy, keys, omitBy, pickBy } from 'remeda';
 
 import type { CommitAnswers } from '../core/message';
 import type { CommitOptions, ToCommitOptionsInput } from './cli.types';
@@ -29,6 +29,11 @@ export const toCommitOptions = ({
     throw new CommitArgsError(MESSAGES.cli.aliasTwice({ positional, flag: flags.alias }));
   }
 
+  // commander rejects `--retry` with answer flags; the positional alias is ours to check.
+  if (flags.retry && isDefined(positional)) {
+    throw new CommitArgsError(MESSAGES.cli.retryWithAnswers);
+  }
+
   const preset: CommitAnswers = omitBy(
     {
       type: flags.type,
@@ -42,9 +47,8 @@ export const toCommitOptions = ({
     isNullish
   );
 
-  if (flags.retry && !isEmpty(preset)) {
-    throw new CommitArgsError(MESSAGES.cli.retryWithAnswers);
-  }
+  // jazzer's own switches for `git commit`; what came after `--` follows them.
+  const gitSwitches = { '--all': flags.all, '--amend': flags.amend, '--no-verify': !flags.verify };
 
   return {
     dryRun: flags.dryRun ?? false,
@@ -53,10 +57,9 @@ export const toCommitOptions = ({
     banner: flags.banner,
     configPath: flags.config,
     preset,
-    alias: positional?.slice(1) ?? flags.alias,
-    gitArgs: [flags.all && '--all', flags.amend && '--amend', !flags.verify && '--no-verify', ...passthrough].filter(
-      isTruthy
-    ),
+    // `:deps` and `--alias deps` name the same alias; `--alias :deps` does too.
+    alias: (positional ?? flags.alias)?.replace(/^:/, ''),
+    gitArgs: [...keys(pickBy(gitSwitches, isTruthy)), ...passthrough],
     cwd
   };
 };

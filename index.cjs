@@ -9,3 +9,7 @@ exports.prompter = async (...args) => {
 
   return prompter(...args);
 };
+
+// For a CommonJS config (`jazzer.config.cjs`): it only returns the config, so it needs no ESM import.
+/** @type {typeof import('./dist/index.mjs').defineConfig} */
+exports.defineConfig = (config) => config;

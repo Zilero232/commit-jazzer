@@ -92,9 +92,10 @@ export const findConfig = async ({ cwd, configPath, env }: FindConfigInput): Pro
     return found({ result, origin: 'explicit' });
   }
 
-  // Real paths on both ends: with a symlinked cwd the stop directory would never be reached.
+  // Real, native paths on both ends: lilconfig compares them as strings, and git prints `C:/repo` on Windows.
   const start = await realpath(cwd);
-  const root = (await getTopLevel({ cwd: start })) ?? start;
+  const topLevel = await getTopLevel({ cwd: start });
+  const root = topLevel ? resolve(topLevel) : start;
   const project = await explorer({ searchPlaces: CONFIG_FILE_NAMES, stopDir: root }).search(start);
 
   const projectConfig = found({ result: project, origin: 'project' });

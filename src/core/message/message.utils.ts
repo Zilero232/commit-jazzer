@@ -39,22 +39,28 @@ export const wrapLine = ({ line, width }: WrapLineInput): string[] => {
     return [line];
   }
 
-  return wrapAnsi(line.slice(indent.length), width - indent.length, { hard: false, trim: true })
-    .split('\n')
-    .reduce<string[]>((lines, part) => {
-      const previous = lines.at(-1);
-      const cut = previous?.lastIndexOf(' ') ?? -1;
+  const parts = wrapAnsi(line.slice(indent.length), width - indent.length, { hard: false, trim: true }).split('\n');
+  const lines: string[] = [];
 
-      // A line must not start with "#": the last word of the line above moves down with it.
-      if (isDefined(previous) && part.startsWith('#') && cut > indent.length) {
-        lines[lines.length - 1] = previous.slice(0, cut);
-        lines.push(`${indent}${previous.slice(cut + 1)} ${part}`);
-      } else if (isDefined(previous) && part.startsWith('#')) {
-        lines[lines.length - 1] = `${previous} ${part}`;
-      } else {
-        lines.push(`${indent}${part}`);
-      }
+  for (const part of parts) {
+    const previous = lines.at(-1);
 
-      return lines;
-    }, []);
+    // git would drop a line starting with "#" as a comment, so such a part never starts a line.
+    if (!isDefined(previous) || !part.startsWith('#')) {
+      lines.push(`${indent}${part}`);
+      continue;
+    }
+
+    const cut = previous.lastIndexOf(' ');
+
+    // The last word of the line above moves down with it; a line of one word takes the part instead.
+    if (cut > indent.length) {
+      lines[lines.length - 1] = previous.slice(0, cut);
+      lines.push(`${indent}${previous.slice(cut + 1)} ${part}`);
+    } else {
+      lines[lines.length - 1] = `${previous} ${part}`;
+    }
+  }
+
+  return lines;
 };

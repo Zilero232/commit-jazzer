@@ -1,5 +1,5 @@
 export {
-  getConfigValue,
+  getCommentChar,
   getCurrentBranch,
   getGitDir,
   getHooksDir,

@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished } from 'vitest';
 
 import { createTempDir, useTempRepo } from '../../../shared/testing/helpers';
 import { readLastMessage, saveLastMessage } from '../last-message';
@@ -18,9 +18,9 @@ describe('saveLastMessage and readLastMessage', () => {
 
   it('do nothing outside a repository', async () => {
     const plain = await createTempDir();
+    onTestFinished(plain.remove);
 
     expect(await saveLastMessage({ message: 'x', cwd: plain.path })).toBeUndefined();
     expect(await readLastMessage({ cwd: plain.path })).toBeUndefined();
-    await plain.remove();
   });
 });

@@ -84,11 +84,12 @@
     "verify": "bun run typecheck && bun run lint && bun run format:check && bun run spell && knip"
   },
   "lint-staged": {
+    "*.{json,md,yml,yaml}": "prettier --write",
     "*.{js,mjs,cjs,ts,mts,cts}": [
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{json,md,yml,yaml}": "prettier --write"
+    "*.vue": "eslint --fix"
   },
   "dependencies": {
     "@commander-js/extra-typings": "^15.0.0",
@@ -110,6 +111,7 @@
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@commitlint/lint": "^21.2.4",
+    "@commitlint/types": "^21.2.3",
     "@semantic-release/changelog": "^7.0.0",
     "@semantic-release/git": "^11.0.1",
     "@siberiacancode/eslint": "^2.18.1",

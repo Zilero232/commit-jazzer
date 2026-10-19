@@ -6,6 +6,7 @@ import { afterEach, beforeEach, vi } from 'vitest';
 
 import type { RunJazzerResult } from '../../app';
 import type { JazzerConfig, ResolvedConfig } from '../../core/config';
+import type { RunGitInput, TempDir, TempRepo } from './testing.types';
 
 import { parseConfig } from '../../core/config';
 
@@ -18,8 +19,6 @@ export const okResult = (message: string): RunJazzerResult => ({
   config: resolvedConfig()
 });
 
-export type TempDir = { path: string; remove: () => Promise<void> };
-
 /** A temporary directory with its real path (macOS links /var to /private/var). */
 export const createTempDir = async (): Promise<TempDir> => {
   const path = await realpath(await mkdtemp(join(tmpdir(), 'commit-jazzer-')));
@@ -27,23 +26,21 @@ export const createTempDir = async (): Promise<TempDir> => {
   return { path, remove: () => rm(path, { recursive: true, force: true }) };
 };
 
-export type TempRepo = TempDir & { git: (...args: string[]) => string };
-
-const git = (cwd: string, args: string[]) =>
+const git = ({ cwd, args }: RunGitInput) =>
   execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 
 /** A throwaway repository on branch `main` with one staged file and a local identity. */
 const createTempRepo = async (): Promise<TempRepo> => {
   const dir = await createTempDir();
 
-  git(dir.path, ['init', '--quiet', '--initial-branch=main']);
-  git(dir.path, ['config', 'user.name', 'Test']);
-  git(dir.path, ['config', 'user.email', 'test@example.com']);
-  git(dir.path, ['config', 'commit.gpgsign', 'false']);
+  git({ cwd: dir.path, args: ['init', '--quiet', '--initial-branch=main'] });
+  git({ cwd: dir.path, args: ['config', 'user.name', 'Test'] });
+  git({ cwd: dir.path, args: ['config', 'user.email', 'test@example.com'] });
+  git({ cwd: dir.path, args: ['config', 'commit.gpgsign', 'false'] });
   await writeFile(join(dir.path, 'file.txt'), 'hello\n');
-  git(dir.path, ['add', 'file.txt']);
+  git({ cwd: dir.path, args: ['add', 'file.txt'] });
 
-  return { ...dir, git: (...args) => git(dir.path, args) };
+  return { ...dir, git: (...args) => git({ cwd: dir.path, args }) };
 };
 
 /** Registers a fresh temporary repository for every test of the surrounding `describe`. */
@@ -75,3 +72,5 @@ export const captureOutput = () => {
 
   return { stdout: () => text(stdout), stderr: () => text(stderr) };
 };
+
+export type * from './testing.types';

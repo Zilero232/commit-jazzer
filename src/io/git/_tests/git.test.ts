@@ -1,6 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished } from 'vitest';
 
 import { createTempDir, useTempRepo } from '../../../shared/testing/helpers';
 import {
@@ -18,10 +18,10 @@ const repo = useTempRepo();
 describe('isInsideWorkTree', () => {
   it('tells a work tree from a plain directory', async () => {
     const plain = await createTempDir();
+    onTestFinished(plain.remove);
 
     expect(await isInsideWorkTree({ cwd: repo().path })).toBe(true);
     expect(await isInsideWorkTree({ cwd: plain.path })).toBe(false);
-    await plain.remove();
   });
 });
 

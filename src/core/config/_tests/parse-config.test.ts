@@ -50,6 +50,12 @@ describe('parseConfig', () => {
     ['a style util.styleText does not know', { showBannerOptions: { options: { color: 'pink' } } }, /color/],
     ['a figlet font that does not exist', { showBannerOptions: { figletOptions: { font: 'Comic Sans' } } }, /font/],
     ['an alias without a title', { aliases: { deps: { type: 'upgrade' } } }, /title/],
+    [
+      'a skipped title',
+      { baseQuestionsOptions: [{ key: 'title', options: { skip: true } }] },
+      /"title" cannot be skipped/
+    ],
+    ['an optional type', { baseQuestionsOptions: [{ key: 'type', options: { required: false } }] }, /"type" cannot be/],
     ['an alias name with spaces', { aliases: { 'my deps': { type: 'upgrade', title: 'x' } } }, /aliases/],
     [
       'an alias with a type that is not offered',

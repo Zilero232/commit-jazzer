@@ -39,8 +39,9 @@ env:
   HUSKY: 0
 
 concurrency:
-  group: docs-${{ github.ref }}
-  # Never cancel a half-finished push to gh-pages; on pull requests the newest run wins.
+  # Every deploy shares one group, whatever triggered it (a push to main, a release tag), so two never push to
+  # gh-pages at once; a half-finished one is never cancelled. On pull requests the newest run wins.
+  group: docs-${{ github.event_name == 'pull_request' && github.ref || 'deploy' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -65,12 +66,15 @@ jobs:
         with:
           name: site
           path: site/.vitepress/dist
+          # .nojekyll: without it GitHub Pages runs Jekyll, which drops files starting with "_".
+          include-hidden-files: true
 
   # Only this job can write, and it runs no project code: it publishes the files the build produced.
   deploy:
     name: Deploy to GitHub Pages
     needs: build
-    if: github.event_name != 'pull_request'
+    # Only main and releases are published; a manual run from another branch only builds.
+    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -80,13 +84,16 @@ jobs:
         with:
           persist-credentials: false
 
+      # A folder of its own: site/ holds the site's sources, which must not be published.
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: site
-          path: site
+          path: _site
 
+      # `clean` removes what the build no longer produces, so gh-pages holds exactly the built site.
       - uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
         with:
           branch: gh-pages
-          folder: site
+          folder: _site
+          clean: true
           token: ${{ github.token }}

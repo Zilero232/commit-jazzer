@@ -42,13 +42,13 @@ describe('buildQuestions', () => {
 
   it('applies question overrides', () => {
     const [question] = build({
-      keys: ['title'],
+      keys: ['description'],
       config: {
         baseQuestionsOptions: [
           {
-            key: 'title',
+            key: 'description',
             message: 'What changed?',
-            options: { required: false, validations: { length: { minMessageLength: 5, maxMessageLength: 50 } } }
+            options: { required: true, validations: { length: { minMessageLength: 5, maxMessageLength: 50 } } }
           }
         ]
       }
@@ -56,9 +56,9 @@ describe('buildQuestions', () => {
 
     expect(question).toEqual({
       kind: 'text',
-      key: 'title',
+      key: 'description',
       message: 'What changed?',
-      required: false,
+      required: true,
       minLength: 5,
       maxLength: 50
     });

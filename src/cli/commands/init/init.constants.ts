@@ -41,6 +41,8 @@ export const LOCAL_SCHEMA = `./node_modules/${PACKAGE_NAME}/schema.json`;
 // The config files `init` writes; with --force one replaces the other.
 export const INIT_CONFIG_FILES = { json: 'jazzer.config.json', ts: 'jazzer.config.ts' } as const;
 
+export const INIT_CONFIG_NAMES = new Set<string>(Object.values(INIT_CONFIG_FILES));
+
 export const TS_CONFIG = `import { defineConfig } from '${PACKAGE_NAME}';
 
 export default defineConfig({});

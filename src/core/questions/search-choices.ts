@@ -12,9 +12,15 @@ export const createChoiceSearch =
     const matches = choices.values.filter((value) => value.toLowerCase().includes(lower));
     const isNew = query !== '' && !choices.values.includes(query);
 
-    return [
-      ...matches.map((value) => ({ name: value, value })),
-      ...(choices.allowCustom && isNew ? [{ name: labels.custom(query), value: query }] : []),
-      ...(required ? [] : [{ name: labels.none, value: '' }])
-    ];
+    const options: ChoiceOption[] = matches.map((value) => ({ name: value, value }));
+
+    if (choices.allowCustom && isNew) {
+      options.push({ name: labels.custom(query), value: query });
+    }
+
+    if (!required) {
+      options.push({ name: labels.none, value: '' });
+    }
+
+    return options;
   };

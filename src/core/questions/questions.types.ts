@@ -2,7 +2,7 @@ import type { CommitField } from '../../shared/constants';
 import type { CommitType } from '../commit-types';
 import type { ResolvedConfig } from '../config';
 import type { Translations } from '../i18n';
-import type { CommitAnswers } from '../message';
+import type { MessageData } from '../message';
 
 type TextField = Exclude<CommitField, 'type'>;
 
@@ -65,7 +65,8 @@ export type LengthLimitInput = {
 
 export type LimitLengthInput = {
   question: TextQuestion;
-  answers: CommitAnswers;
+  /** The answers so far, with the chosen type's emoji: it counts towards the header. */
+  answers: MessageData;
 };
 
 export type InferFromBranchInput = {

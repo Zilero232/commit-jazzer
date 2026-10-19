@@ -1,4 +1,4 @@
-import { isEmpty, isNullish, omitBy } from 'remeda';
+import { isArray, isEmpty, isNullish, isNumber, isString, omitBy } from 'remeda';
 
 import type { JazzerConfig } from './config.types';
 
@@ -6,17 +6,19 @@ import { BUILT_IN_COMMIT_TYPE_NAMES } from '../commit-types';
 
 // A commitlint rule: [level, 'always' | 'never', value]. Level 0 is off.
 const ruleValue = (rule: unknown): unknown => {
-  if (!Array.isArray(rule) || rule[0] === 0 || rule[1] !== 'always') {
+  if (!isArray(rule) || rule[0] === 0 || rule[1] !== 'always') {
     return undefined;
   }
 
   return rule[2];
 };
 
-const isStringArray = (value: unknown): value is string[] =>
-  Array.isArray(value) && value.every((item) => typeof item === 'string');
+const isStringArray = (value: unknown): value is string[] => isArray(value) && value.every(isString);
 
-const positiveInt = (value: unknown) => (Number.isInteger(value) && Number(value) > 0 ? Number(value) : undefined);
+const positiveInt = (value: unknown) => (isNumber(value) && Number.isInteger(value) && value > 0 ? value : undefined);
+
+// Level 2 is an error: commitlint rejects the commit, so a custom scope must not be offered.
+const isError = (rule: unknown) => isArray(rule) && rule[0] === 2;
 
 /**
  * Maps the commitlint rules commit-jazzer can follow to config values: `type-enum` → `availableCommitTypes`
@@ -39,7 +41,7 @@ export const fromCommitlintRules = (rules: Record<string, unknown>): Partial<Jaz
       availableCommitTypes: isEmpty(types) ? undefined : types,
       scopes: hasScopes ? scopes : undefined,
       // Custom scopes stay allowed unless the rule is an error.
-      allowCustomScopes: hasScopes ? !(Array.isArray(scopeRule) && scopeRule[0] === 2) : undefined,
+      allowCustomScopes: hasScopes ? !isError(scopeRule) : undefined,
       headerMaxLength,
       bodyLineLength
     },

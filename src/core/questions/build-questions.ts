@@ -14,7 +14,9 @@ const localizeTypes = ({ config, translations }: LocalizeTypesInput): CommitType
   const described = new Map(Object.entries(translations.commitTypes));
   const own = new Set([
     ...Object.keys(config.addCustomCommitTypes),
-    ...Object.entries(config.baseCommitTypes).flatMap(([name, type]) => (type?.description ? [name] : []))
+    ...Object.entries(config.baseCommitTypes)
+      .filter(([, type]) => isDefined(type?.description))
+      .map(([name]) => name)
   ]);
 
   return resolveCommitTypes(config).map((type) =>
@@ -26,14 +28,14 @@ const localizeTypes = ({ config, translations }: LocalizeTypesInput): CommitType
 export const buildQuestions = ({ config, translations, keys }: BuildQuestionsInput): Question[] => {
   // A question whose answer the template never writes is not asked: `{{type}}: {{title}}` asks two.
   const written = templateFields(config.template);
-  const asked = new Set((keys ?? config.availablePromptQuestions).filter((key) => isDefined(keys) || written.has(key)));
+  const asked = new Set(keys ?? config.availablePromptQuestions.filter((key) => written.has(key)));
 
   return COMMIT_FIELDS.filter((key) => asked.has(key)).flatMap((key): Question[] => {
     const override = config.baseQuestionsOptions.find((question) => question.key === key);
     const options = override?.options ?? {};
 
     // Explicit keys are built even when skipped: they validate answers given by flag.
-    if (options.skip && !keys) {
+    if (options.skip && !isDefined(keys)) {
       return [];
     }
 
@@ -57,9 +59,11 @@ export const buildQuestions = ({ config, translations, keys }: BuildQuestionsInp
         required: options.required ?? FIELD_DEFAULTS[key].required,
         minLength: length.minMessageLength ?? 0,
         maxLength: length.maxMessageLength ?? FIELD_DEFAULTS[key].maxLength,
-        ...(key === 'component' && !isEmpty(config.scopes)
-          ? { choices: { values: config.scopes, allowCustom: config.allowCustomScopes } }
-          : {})
+        // Scopes become a pick-or-type list when the config names some.
+        choices:
+          key === 'component' && !isEmpty(config.scopes)
+            ? { values: config.scopes, allowCustom: config.allowCustomScopes }
+            : undefined
       }
     ];
   });

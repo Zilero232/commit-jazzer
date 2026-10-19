@@ -33,13 +33,13 @@ describe('createProfanityFilter', () => {
   });
 
   it('masks every character of a blocked word with the placeholder', () => {
-    const hash = createProfanityFilter({
+    const dots = createProfanityFilter({
       additionalBlockWords: ['badword'],
-      placeholder: '#',
+      placeholder: '•',
       overrideBlockWords: true
     });
 
-    expect(hash.mask('a badword! Badword?')).toBe('a #######! #######?');
+    expect(dots.mask('a badword! Badword?')).toBe('a •••••••! •••••••?');
   });
 
   it('removes blocked words together with one space', () => {
@@ -70,5 +70,9 @@ describe('createProfanityFilter', () => {
 
     expect(relaxed.blockList).not.toContain('wtf');
     expect(relaxed.findProfaneWords('wtf')).toEqual([]);
+  });
+
+  it('rejects "#" as the placeholder: git would drop a line starting with a masked word', () => {
+    expect(() => createProfanityFilter({ placeholder: '#' })).toThrow(/Must not start with/);
   });
 });

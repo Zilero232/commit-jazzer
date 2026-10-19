@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { useTempRepo } from '../../shared/testing/helpers';
 
 // The real command, from argv to a commit: bun runs the TypeScript entry point directly.
+// The built CLI on each supported Node version is covered by the smoke test in CI.
 const BIN = join(import.meta.dirname, '..', '..', 'bin.ts');
 
 const jazzer = ({ args, cwd }: { args: string[]; cwd: string }) =>

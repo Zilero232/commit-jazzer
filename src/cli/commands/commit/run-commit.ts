@@ -17,14 +17,14 @@ import {
 } from '../../../io/git';
 import { logger } from '../../../io/logger';
 import { MESSAGES } from '../../../shared/messages';
-import { COMMITS_WITHOUT_STAGE } from './commit.constants';
+import { COMMITS_WITHOUT_STAGE, SHORT_FLAGS_WITHOUT_STAGE } from './commit.constants';
 
 // A file after `--` commits that file whether it is staged or not: changed, or deleted and still known to git.
 const isPathspec = async ({ arg, cwd }: IsPathspecInput) =>
   !arg.startsWith('-') && (existsSync(resolve(cwd, arg)) || (await isTracked({ path: arg, cwd })));
 
 const canCommitWithoutStage = async ({ gitArgs, cwd = process.cwd() }: StageCheckInput) => {
-  if (gitArgs.some((arg) => COMMITS_WITHOUT_STAGE.has(arg))) {
+  if (gitArgs.some((arg) => COMMITS_WITHOUT_STAGE.has(arg) || SHORT_FLAGS_WITHOUT_STAGE.test(arg))) {
     return true;
   }
 
@@ -52,6 +52,7 @@ const resolveMessage = async (options: CommitOptions): Promise<ResolvedMessage> 
     alias: options.alias,
     preset: options.preset,
     yes: options.yes,
+    // A dry run only prints the message, so there is nothing to confirm; otherwise the config decides.
     confirm: options.dryRun ? false : undefined
   });
 
@@ -99,12 +100,16 @@ export const runCommit = async (options: CommitOptions): Promise<number> => {
 
   const code = await gitCommit({ messageFile, args: gitArgs, cwd });
 
-  // `git commit --dry-run` exits with 0 without committing: the message stays for the real commit.
-  if (code === 0 && !gitArgs.includes('--dry-run')) {
-    await clearLastMessage({ cwd });
-  } else if (code !== 0) {
+  if (code !== 0) {
     logger.warn(MESSAGES.commit.failed);
+
+    return code;
   }
 
-  return code;
+  // `git commit --dry-run` exits with 0 without committing: the message stays for the real commit.
+  if (!gitArgs.includes('--dry-run')) {
+    await clearLastMessage({ cwd });
+  }
+
+  return 0;
 };

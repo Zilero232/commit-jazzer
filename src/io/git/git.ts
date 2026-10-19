@@ -1,4 +1,5 @@
 import { execFile, spawn } from 'node:child_process';
+import { constants } from 'node:os';
 import { promisify } from 'node:util';
 import { isDefined } from 'remeda';
 
@@ -20,17 +21,31 @@ const git = async ({ args, cwd }: RunGitInput): Promise<string | undefined> => {
 export const isInsideWorkTree = async (input?: GitInput): Promise<boolean> =>
   (await git({ args: ['rev-parse', '--is-inside-work-tree'], ...input })) === 'true';
 
-/** `git diff --cached --quiet` exits with 1 when something is staged. */
-export const hasStagedChanges = async (input?: GitInput): Promise<boolean> =>
-  !isDefined(await git({ args: ['diff', '--cached', '--quiet'], ...input }));
+/** `git diff --cached --quiet` exits with 1 when something is staged; any other failure is not "staged". */
+export const hasStagedChanges = async (input?: GitInput): Promise<boolean> => {
+  try {
+    await execFileAsync('git', ['diff', '--cached', '--quiet'], { cwd: input?.cwd });
+
+    return false;
+  } catch (error) {
+    return error instanceof Error && 'code' in error && error.code === 1;
+  }
+};
 
 /** Whether git knows the path: it commits a deleted file too, which no longer exists on disk. */
 export const isTracked = async ({ path, cwd }: GitPathInput): Promise<boolean> =>
   isDefined(await git({ args: ['ls-files', '--error-unmatch', '--', path], cwd }));
 
 /** A value of the git config, e.g. `core.commentChar`; `undefined` when it is not set. */
-export const getConfigValue = ({ key, cwd }: GitConfigInput): Promise<string | undefined> =>
+const getConfigValue = ({ key, cwd }: GitConfigInput): Promise<string | undefined> =>
   git({ args: ['config', '--get', key], cwd });
+
+/** git's comment character (`core.commentChar`); `#` when unset or `auto`, which starts as `#`. */
+export const getCommentChar = async (input?: GitInput): Promise<string> => {
+  const setting = await getConfigValue({ key: 'core.commentChar', ...input });
+
+  return setting && setting !== 'auto' ? setting : '#';
+};
 
 /** Absolute path of the `.git` directory; in a worktree, the worktree's own one. */
 export const getGitDir = (input?: GitInput): Promise<string | undefined> =>
@@ -57,5 +72,6 @@ export const gitCommit = ({ messageFile, args = [], cwd }: GitCommitInput): Prom
     const child = spawn('git', ['commit', '-F', messageFile, ...args], { cwd, stdio: 'inherit' });
 
     child.on('error', reject);
-    child.on('close', (code) => resolve(code ?? 1));
+    // Killed by a signal: report it the way a shell does, 128 + the signal number (130 for Ctrl+C).
+    child.on('close', (code, signal) => resolve(code ?? 128 + (signal ? constants.signals[signal] : 0)));
   });

@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, onTestFinished } from 'vitest';
 
 import type { InitOptions } from '../cli.types';
 
@@ -116,12 +116,46 @@ describe('runInit', () => {
     expect(existsSync(at('.husky', '_', 'prepare-commit-msg'))).toBe(false);
   });
 
-  it('warns when .husky exists but git does not run it', async () => {
+  it('warns once when .husky exists but git does not run it', async () => {
     await mkdir(at('.husky'));
 
-    expect(await init({ hook: true })).toBe(0);
+    expect(await init({ hook: true, lint: true })).toBe(0);
     expect(existsSync(at('.husky', 'prepare-commit-msg'))).toBe(true);
-    expect(output.stderr()).toContain('run `npx husky` once');
+    expect(output.stderr().split('run `npx husky` once')).toHaveLength(2);
+  });
+
+  it('still installs the questions hook when the template rules out the lint hook', async () => {
+    await writeFile(at('.jazzerrc'), JSON.stringify({ template: '{{title}}' }));
+
+    expect(await init({ hook: true, lint: true })).toBe(1);
+    expect(existsSync(at(...HOOK))).toBe(true);
+    expect(existsSync(at('.git', 'hooks', 'commit-msg'))).toBe(false);
+  });
+
+  it('adds the hook with --force when package.json holds the config', async () => {
+    await writeFile(at('package.json'), JSON.stringify({ name: 'x', jazzer: { language: 'ru' } }));
+
+    expect(await init({ hook: true, force: true })).toBe(0);
+    expect(existsSync(at(...HOOK))).toBe(true);
+  });
+
+  it("removes its hooks from git's hooks directory and from .husky alike", async () => {
+    await init({ hook: true, lint: true });
+    await mkdir(at('.husky'));
+    await writeFile(at('.husky', 'commit-msg'), `#!/bin/sh\n${HOOK_MARKER}\n`);
+
+    expect(await init({ removeHook: true })).toBe(0);
+    expect(existsSync(at(...HOOK))).toBe(false);
+    expect(existsSync(at('.git', 'hooks', 'commit-msg'))).toBe(false);
+    expect(existsSync(at('.husky', 'commit-msg'))).toBe(false);
+  });
+
+  it('installs into the hooks of the main repository from a linked worktree', async () => {
+    repo().git('commit', '--allow-empty', '-qm', 'chore: init');
+    repo().git('worktree', 'add', '-q', at('wt'));
+
+    expect(await init({ hook: true, cwd: at('wt') })).toBe(0);
+    expect(existsSync(at(...HOOK))).toBe(true);
   });
 
   it('adds only the hook to a configured project', async () => {
@@ -134,9 +168,10 @@ describe('runInit', () => {
   it('writes nothing outside a repository when a hook is asked for', async () => {
     const plain = await createTempDir();
 
+    onTestFinished(plain.remove);
+
     expect(await init({ hook: true, cwd: plain.path })).toBe(1);
     expect(existsSync(join(plain.path, 'jazzer.config.json'))).toBe(false);
-    await plain.remove();
   });
 
   it('never replaces a hook it did not write, even with --force', async () => {

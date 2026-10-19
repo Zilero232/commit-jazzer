@@ -30,6 +30,7 @@ export const resolvePreset = ({ config, flags, alias }: ResolvePresetInput): Com
     throw new AnswerError({
       code: 'invalid',
       field: lost,
+      // The template calls the component field {{scope}}.
       reason: MESSAGES.answer.lost(lost === 'component' ? 'scope' : lost)
     });
   }
