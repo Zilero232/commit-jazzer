@@ -116,7 +116,7 @@
 		"commander": "^13.0.0",
 		"copy-webpack-plugin": "^13.0.0",
 		"cspell": "^8.16.0",
-		"eslint": "^9.13.0",
+		"eslint": "^10.0.0",
 		"eslint-config-prettier": "^10.0.0",
 		"eslint-plugin-format": "^1.0.0",
 		"eslint-plugin-prettier": "^5.2.1",
