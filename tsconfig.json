@@ -1,4 +1,17 @@
 {
-	"extends": "./tsconfig.base.json",
-	"include": ["**/*.ts", "**/*.d.ts", ".jazzer.config.ts"]
+  "extends": "@siberiacancode/tsconfig/tsconfig.bundler.json",
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "Preserve",
+    "types": ["node"],
+    "allowJs": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true
+  },
+  "include": ["src", "scripts", "*.config.ts", ".jazzer.config.ts", "docs/.vitepress/**/*.ts"]
 }

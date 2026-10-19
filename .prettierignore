@@ -1,0 +1,8 @@
+dist
+coverage
+schema.json
+CHANGELOG.md
+# Formatted by ESLint (eslint-plugin-vue), which disagrees with prettier on templates.
+*.vue
+docs/.vitepress/cache
+docs/.vitepress/dist

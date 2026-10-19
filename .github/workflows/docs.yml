@@ -1,0 +1,87 @@
+name: Docs
+
+# Builds the VitePress site; on main, pushes it to the gh-pages branch that GitHub Pages serves at
+# https://zilero232.github.io/commit-jazzer/. The JSON Schema `jazzer init` points to is part of the site.
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/**
+      - src/**
+      - scripts/**
+      - package.json
+      - bun.lock
+      - mise.toml
+      - .github/workflows/docs.yml
+      - .github/actions/setup/**
+
+  pull_request:
+    paths:
+      - docs/**
+      - src/**
+      - scripts/**
+      - package.json
+      - bun.lock
+      - mise.toml
+      - .github/workflows/docs.yml
+      - .github/actions/setup/**
+
+  # Again after a release, so the version in the navigation is the new one (the release commit skips CI).
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  HUSKY: 0
+
+concurrency:
+  group: docs-${{ github.ref }}
+  # Never cancel a half-finished push to gh-pages; on pull requests the newest run wins.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # The "last updated" date of every page comes from the git history.
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+
+      - run: bun run docs:build
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: docs/.vitepress/dist
+
+  # Only this job can write, and it runs no project code: it publishes the files the build produced.
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write # pushing to gh-pages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: site
+
+      - uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
+        with:
+          branch: gh-pages
+          folder: site
+          token: ${{ github.token }}

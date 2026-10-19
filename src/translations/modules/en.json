@@ -1,9 +1,0 @@
-{
-	"type": "Select the type of change (e.g., fix, feature, docs)",
-	"component": "Specify the component or module affected by this commit",
-	"title": "Provide a short, descriptive title for the commit",
-	"description": "Provide a detailed description of the changes",
-	"breaking": "List any breaking changes introduced in this commit (if any)",
-	"issues": "List related issue IDs (e.g., #1234)",
-	"comment": "Add any additional comments for context"
-}

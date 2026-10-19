@@ -1,9 +1,0 @@
-{
-	"type": "Selecciona el tipo de cambio (por ejemplo, fix, feature, docs)",
-	"component": "Especifica el componente o módulo afectado por este commit",
-	"title": "Proporciona un título corto y descriptivo para el commit",
-	"description": "Proporciona una descripción detallada de los cambios",
-	"breaking": "Enumera cualquier cambio importante introducido en este commit (si lo hay)",
-	"issues": "Enumera los IDs de los problemas relacionados (por ejemplo, #1234)",
-	"comment": "Agrega cualquier comentario adicional para dar contexto"
-}

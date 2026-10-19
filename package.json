@@ -1,151 +1,155 @@
 {
-	"name": "commit-jazzer",
-	"type": "module",
-	"version": "1.1.5",
-	"description": "🎸 Smart Git commit CLI that adds emojis and enforces Conventional Commits. Features intelligent commit message suggestions, customizable templates, and seamless integration with popular tools. Perfect for teams wanting consistent, readable git history.",
-	"author": {
-		"name": "Artemev Alexandr",
-		"url": "https://github.com/Zilero232"
-	},
-	"license": "MIT",
-	"funding": {
-		"type": "github",
-		"url": "https://github.com/sponsors/Zilero232"
-	},
-	"homepage": "https://github.com/Zilero232/commit-jazzer#readme",
-	"repository": {
-		"url": "git+https://github.com/Zilero232/commit-jazzer.git"
-	},
-	"bugs": {
-		"url": "https://github.com/Zilero232/commit-jazzer/issues"
-	},
-	"keywords": [
-		"git",
-		"commit",
-		"commitizen",
-		"gitmoji",
-		"conventional-commits",
-		"semantic-release",
-		"git-hooks",
-		"cli",
-		"developer-tools",
-		"automation",
-		"git-workflow",
-		"commit-message",
-		"commit-lint",
-		"emoji-commits",
-		"git-automation",
-		"typescript",
-		"nodejs",
-		"devtools",
-		"productivity",
-		"team-collaboration"
-	],
-	"categories": [
-		"Programming Languages",
-		"SCM Providers",
-		"Other"
-	],
-	"exports": {
-		".": {
-			"import": "./build/esm/index.js",
-			"require": "./build/common/index.cjs"
-		}
-	},
-	"main": "./build/common/index.cjs",
-	"types": "./build/types/index.ts",
-	"files": [
-		"build/"
-	],
-	"config": {
-		"commitizen": {
-			"path": "./build/common/index.cjs"
-		}
-	},
-	"engines": {
-		"node": ">=14.17.6"
-	},
-	"scripts": {
-		"watch": "node --import=./scripts/register-ts-node.js ./node_modules/webpack-cli/bin/cli.js -c ./webpack.config.ts --mode development --watch",
-		"build:dev": "node --import=./scripts/register-ts-node.js ./node_modules/webpack-cli/bin/cli.js -c ./webpack.config.ts --mode development",
-		"build:prod": "yarn generate-schema && node --import=./scripts/register-ts-node.js ./node_modules/webpack-cli/bin/cli.js -c ./webpack.config.ts --mode production",
-		"lint:check": "yarn eslint",
-		"lint:fix": "yarn eslint --fix",
-		"test": "vitest run -c ./vitest.config.ts",
-		"test:watch": "vitest watch -c ./vitest.config.ts",
-		"generate-schema": "node --import=./scripts/register-ts-node.js ./scripts/generate-schema.ts",
-		"commit": "yarn git-cz",
-		"knip": "knip -c ./knip.json -t ./tsconfig.json",
-		"cspell": "cspell lint -c ./.cspell.json --gitignore --cache --cache-location ./cache/cspellcache",
-		"prepare": "husky"
-	},
-	"publishConfig": {
-		"access": "public"
-	},
-	"dependencies": {
-		"chalk": "^4.1.2",
-		"commitizen": "^4.3.1",
-		"cosmiconfig": "^9.0.0",
-		"figlet": "^1.8.0",
-		"fuse.js": "^7.0.0",
-		"handlebars": "^4.7.8",
-		"inquirer": "8.2.7",
-		"inquirer-autocomplete-prompt": "2.0.1",
-		"inquirer-maxlength-input-prompt": "^1.0.2",
-		"ts-deepmerge": "^7.0.2",
-		"winston": "^3.17.0",
-		"zod": "^3.23.8"
-	},
-	"devDependencies": {
-		"@antfu/eslint-config": "^3.8.0",
-		"@babel/core": "^7.26.0",
-		"@babel/plugin-transform-modules-commonjs": "^7.25.9",
-		"@babel/preset-env": "^7.26.0",
-		"@babel/preset-typescript": "^7.26.0",
-		"@cspell/dict-ru_ru": "^2.2.4",
-		"@types/chalk": "^2.2.4",
-		"@types/figlet": "^1.7.0",
-		"@types/inquirer": "^9.0.7",
-		"@types/inquirer-autocomplete-prompt": "^3.0.3",
-		"@types/node": "^22.9.0",
-		"@types/webpack-bundle-analyzer": "^4.7.0",
-		"@types/webpack-node-externals": "^3.0.4",
-		"@vitest/coverage-v8": "^2.1.5",
-		"@vitest/ui": "^2.1.5",
-		"babel-loader": "^10.0.0",
-		"commander": "^13.0.0",
-		"copy-webpack-plugin": "^13.0.0",
-		"cspell": "^8.16.0",
-		"eslint": "^9.13.0",
-		"eslint-config-prettier": "^10.0.0",
-		"eslint-plugin-format": "^1.0.0",
-		"eslint-plugin-prettier": "^5.2.1",
-		"fork-ts-checker-webpack-plugin": "^9.0.2",
-		"husky": "^9.1.6",
-		"knip": "^5.36.3",
-		"lint-staged": "^15.2.10",
-		"ts-loader": "^9.5.1",
-		"ts-node": "^10.9.2",
-		"tsconfig-paths-webpack-plugin": "^4.1.0",
-		"tslib": "^2.8.1",
-		"typescript": "^5.6.3",
-		"typescript-json-schema": "^0.67.0",
-		"vite-tsconfig-paths": "^5.1.0",
-		"vitest": "^2.1.4",
-		"webpack": "^5.96.0",
-		"webpack-bundle-analyzer": "^4.10.2",
-		"webpack-cli": "^6.0.0",
-		"webpack-node-externals": "^3.0.0",
-		"webpack-shell-plugin-next": "^2.3.2"
-	},
-	"overrides": {
-		"inquirer": "8.2.7",
-		"npm": ">=6.0.0"
-	},
-	"lint-staged": {
-		"*.{ts,tsx,js,jsx,yaml}": [
-			"yarn lint:check",
-			"yarn cspell"
-		]
-	}
+  "name": "commit-jazzer",
+  "type": "module",
+  "version": "1.1.5",
+  "packageManager": "bun@1.3.14",
+  "description": "Conventional Commits with emoji: an interactive CLI, a git hook and a Commitizen adapter. Fuzzy type search, scopes, breaking changes, issue footers, 13 languages and a typed config.",
+  "author": {
+    "name": "Artemev Alexandr",
+    "url": "https://github.com/Zilero232"
+  },
+  "license": "MIT",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/Zilero232"
+  },
+  "homepage": "https://zilero232.github.io/commit-jazzer/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zilero232/commit-jazzer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Zilero232/commit-jazzer/issues"
+  },
+  "keywords": [
+    "git",
+    "commit",
+    "conventional-commits",
+    "commitizen",
+    "cz-adapter",
+    "commitlint",
+    "semantic-release",
+    "gitmoji",
+    "emoji",
+    "prepare-commit-msg",
+    "cli"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./index.d.cts",
+        "default": "./index.cjs"
+      }
+    },
+    "./schema.json": "./schema.json",
+    "./package.json": "./package.json"
+  },
+  "main": "./index.cjs",
+  "types": "./index.d.cts",
+  "bin": {
+    "commit-jazzer": "./dist/cli.mjs",
+    "jazzer": "./dist/cli.mjs"
+  },
+  "files": [
+    "!dist/cli.d.mts",
+    "dist",
+    "index.cjs",
+    "index.d.cts",
+    "schema.json"
+  ],
+  "config": {
+    "commitizen": {
+      "path": "./index.cjs"
+    }
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "build": "bun run generate-schema && tsdown",
+    "dev": "tsdown --watch",
+    "docs:dev": "bun run generate-schema && vitepress dev docs",
+    "docs:build": "bun run generate-schema && vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "generate-schema": "bun ./scripts/generate-schema.ts",
+    "generate-fonts": "bun ./scripts/generate-fonts.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "spell": "cspell lint --config ./cspell.json --gitignore --no-progress --no-must-find-files .",
+    "knip": "knip",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "verify": "bun run typecheck && bun run lint && bun run format:check && bun run spell && bun run knip",
+    "fix": "bun run lint:fix && bun run format",
+    "commit": "bun run build && node ./dist/cli.mjs",
+    "prepublishOnly": "bun run build",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@inquirer/editor": "^5.3.4",
+    "@inquirer/input": "^5.1.7",
+    "@inquirer/search": "^4.3.4",
+    "@inquirer/select": "^5.2.6",
+    "figlet": "^1.12.0",
+    "fuse.js": "^7.5.0",
+    "handlebars": "^4.7.10",
+    "jiti": "^2.7.0",
+    "lilconfig": "^3.1.4",
+    "string-width": "^8.3.0",
+    "wrap-ansi": "^10.0.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@commitlint/lint": "^21.2.4",
+    "@cspell/dict-ru_ru": "^2.3.4",
+    "@semantic-release/changelog": "^7.0.0",
+    "@semantic-release/git": "^11.0.1",
+    "@semantic-release/github": "^12.0.10",
+    "@semantic-release/npm": "^13.2.0",
+    "@siberiacancode/eslint": "^2.18.1",
+    "@siberiacancode/prettier": "^1.9.0",
+    "@siberiacancode/tsconfig": "^1.2.0",
+    "@types/node": "^22.19.0",
+    "@vitest/coverage-v8": "^5.0.5",
+    "conventional-changelog-conventionalcommits": "^9.3.1",
+    "conventional-commits-parser": "^7.1.3",
+    "cspell": "^10.4.0",
+    "escape-string-regexp": "^5.0.0",
+    "eslint": "^10.13.0",
+    "husky": "^9.1.7",
+    "knip": "^6.42.0",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
+    "publint": "^0.3.25",
+    "remeda": "^2.52.0",
+    "semantic-release": "^25.0.9",
+    "ts-pattern": "^5.9.2",
+    "tsdown": "^0.23.1",
+    "typescript": "~6.0.3",
+    "vitepress": "^1.6.4",
+    "vitest": "^5.0.5",
+    "vue": "^3.5.44"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs,ts,mts,cts}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": "prettier --write"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }

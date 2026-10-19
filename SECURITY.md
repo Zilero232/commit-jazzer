@@ -1,7 +1,9 @@
 # Security Policy
 
-## Reporting a Vulnerability
+## Supported versions
 
-If you believe you have found a security vulnerability in our library, we encourage you to let us know right away. We will investigate all legitimate reports and do our best to quickly fix the problem.
+Only the latest major version gets security fixes.
 
-Please let us know by creating an issue in this repository
+## Reporting a vulnerability
+
+Please do not open a public issue. Report it privately through [GitHub security advisories](https://github.com/Zilero232/commit-jazzer/security/advisories/new). You will get an answer within a week; once a fix is released, the advisory is published with credit to you unless you prefer otherwise.
