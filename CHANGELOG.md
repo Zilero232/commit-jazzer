@@ -1,3 +1,13 @@
+## [2.0.1](https://github.com/Zilero232/commit-jazzer/compare/v2.0.0...v2.0.1) (2026-10-19)
+
+### Bug Fixes
+
+* 🐛 handle every command and error path found in a full review ([462028a](https://github.com/Zilero232/commit-jazzer/commit/462028a4cbfeb7d97f6a2f0d183d3624f91831f7))
+
+### Documentation
+
+* 📝 a documentation button in the README, package.json in order ([1eea424](https://github.com/Zilero232/commit-jazzer/commit/1eea424016648e97ccbe2d5925b517ddcc8e9bba))
+
 ## [2.0.0](https://github.com/Zilero232/commit-jazzer/compare/v1.1.5...v2.0.0) (2026-10-19)
 
 ### ⚠ BREAKING CHANGES

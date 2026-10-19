@@ -1,6 +1,6 @@
 {
   "name": "commit-jazzer",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Conventional Commits with emoji: an interactive CLI, a git hook and a Commitizen adapter. Fuzzy type search, scopes, breaking changes, issue footers, 13 languages and a typed config.",
   "keywords": [
     "cli",
