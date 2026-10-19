@@ -2364,10 +2364,10 @@ acorn@^8.0.4, acorn@^8.11.0, acorn@^8.14.0, acorn@^8.4.1, acorn@^8.5.0, acorn@^8
   resolved "https://registry.npmjs.org/acorn/-/acorn-8.14.0.tgz#063e2c70cac5fb4f6467f0b11152e04c682795b0"
   integrity sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==
 
-acorn@^8.14.1:
-  version "8.15.0"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.15.0.tgz#a360898bc415edaac46c8241f6383975b930b816"
-  integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
+acorn@^8.15.0:
+  version "8.19.0"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.19.0.tgz#6b26fd97ce1cc9dc50bdf7ad305e9f1384d4f28a"
+  integrity sha512-oJlA3XiRm7Cyk6qFD2Jn8ak9B7jSy0qy00ADO3+8dpT0LSjFihQYv4C02LFCSYJV3Q37xYwwRy5m+IpIiUzqWw==
 
 aggregate-error@^3.0.0:
   version "3.1.0"
@@ -6955,11 +6955,11 @@ vitest@^2.1.4:
     why-is-node-running "^2.3.0"
 
 vm2@^3.10.0:
-  version "3.10.1"
-  resolved "https://registry.yarnpkg.com/vm2/-/vm2-3.10.1.tgz#f06e263a21f4802bf6dc2bbacf8d3b702d999d67"
-  integrity sha512-5VKPEiEzLPiIKxfHoGoafr1yL5PKeALbbwwYhiwyEgWmslnao7e1UxKGL93ekGGt45ETs+zFB0tTYLADzCWH8g==
+  version "3.12.2"
+  resolved "https://registry.yarnpkg.com/vm2/-/vm2-3.12.2.tgz#0a8cab04496918a94911498d6f42f3d3cc06df7e"
+  integrity sha512-LRHt4xU6eXshlZEcSZVrTehLGxRDjHvjmFPGwEp4xGpZX61QzH6Xm9wK2nU7XAp36V1w2xILAL1LwxVkgD1Ipw==
   dependencies:
-    acorn "^8.14.1"
+    acorn "^8.15.0"
     acorn-walk "^8.3.4"
 
 vscode-languageserver-textdocument@^1.0.12:
